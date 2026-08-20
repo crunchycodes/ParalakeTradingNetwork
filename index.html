@@ -1159,7 +1159,7 @@
                 .select('email_notifications')
                 .eq('id', data.user.id)
                 .maybeSingle();
-            document.getElementById('profileEmailNotifications').checked = profile?.email_notifications === true;
+            document.getElementById('profileEmailNotifications').checked = profile?.email_notifications ?? metadata.email_notifications === true;
             renderProfileShops(data.user.id);
             showProfileMessage('', '');
 
@@ -1218,23 +1218,33 @@
                     display_name: document.getElementById('profileDisplayName').value.trim(),
                     phone: document.getElementById('profilePhone').value.trim(),
                     organization: document.getElementById('profileOrganization').value.trim(),
-                    avatar_url: document.getElementById('profileAvatarUrl').value.trim()
+                    avatar_url: document.getElementById('profileAvatarUrl').value.trim(),
+                    email_notifications: document.getElementById('profileEmailNotifications').checked
                 }
             });
 
-            const profileError = userError || (await supabaseClient.from('profiles').upsert({
-                id: userData.user.id,
-                display_name: document.getElementById('profileDisplayName').value.trim(),
-                phone: document.getElementById('profilePhone').value.trim(),
-                organization: document.getElementById('profileOrganization').value.trim(),
-                avatar_url: document.getElementById('profileAvatarUrl').value.trim(),
-                email_notifications: document.getElementById('profileEmailNotifications').checked,
-                updated_at: new Date().toISOString()
-            })).error;
+            let profileError = userError;
+            let profilesTableMissing = false;
+            if (!profileError && userData?.user) {
+                profileError = (await supabaseClient.from('profiles').upsert({
+                    id: userData.user.id,
+                    display_name: document.getElementById('profileDisplayName').value.trim(),
+                    phone: document.getElementById('profilePhone').value.trim(),
+                    organization: document.getElementById('profileOrganization').value.trim(),
+                    avatar_url: document.getElementById('profileAvatarUrl').value.trim(),
+                    email_notifications: document.getElementById('profileEmailNotifications').checked,
+                    updated_at: new Date().toISOString()
+                })).error;
+                profilesTableMissing = profileError?.code === 'PGRST205' || profileError?.message?.includes("public.profiles");
+            }
 
             saveButton.disabled = false;
             saveButton.classList.remove('opacity-60', 'cursor-not-allowed');
             if (profileError) {
+                if (profilesTableMissing) {
+                    showProfileMessage('Profile saved to your account. Run supabase/schema.sql to enable database profiles and email notifications.', 'success');
+                    return;
+                }
                 showProfileMessage(profileError.message);
                 return;
             }
