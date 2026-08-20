@@ -207,9 +207,63 @@
         const REPO_BASE_URL = `https://crunchycodes.github.io/${REPO_NAME}`;
         const GITHUB_REPO_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
         
-        // Default list of known shop subfolders used ONLY as a fallback if API query fails
-        const KNOWN_FOLDERS = ['Samuels-Shop', 'Sams-Shop'];
+        // Default list of known shop subfolders used as fallback if API query fails
+        const KNOWN_FOLDERS = ['Bing-Bong', 'Samuels-Shop', 'Sams-Shop'];
         
+        // Fallback featured config if featuredshops.json is missing or restricted by CORS/404
+        const DEFAULT_FEATURED_CONFIG = [
+            {
+                folder: "Bing-Bong",
+                items: ["AK-47", "M4A1", "Kevlar & Helmet", "Lockpick"]
+            },
+            {
+                folder: "Samuels-Shop",
+                items: ["Pistol Ammo", "Rifle Ammo", "Bandage", "Repair Kit"]
+            }
+        ];
+
+        // Fallback shop profiles with priced inventory for rich preview display
+        const FALLBACK_SHOPS = [
+            {
+                folderName: "Bing-Bong",
+                shopUrl: `${REPO_BASE_URL}/Bing-Bong`,
+                githubUrl: `${GITHUB_REPO_URL}/tree/main/Bing-Bong`,
+                profile: {
+                    shopName: "Bing Bong's Armory",
+                    characterName: "Bing Bong",
+                    contactPhone: "555-0199",
+                    organizationName: "Paralake Defense Corp",
+                    shopNotes: "Premium weaponry, body armor, and tactical gear. Bulk orders available upon request.",
+                    profileImage: `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/Bing-Bong/logo.png`,
+                    inventory: [
+                        { name: "AK-47", sellPrice: 12500, category: "weaponry", id: "ak47" },
+                        { name: "M4A1 Rifle", sellPrice: 15000, category: "weaponry", id: "m4a1" },
+                        { name: "Heavy Kevlar & Helmet", sellPrice: 3500, category: "equipment", id: "armor" },
+                        { name: "Lockpick Set", sellPrice: 850, category: "tools", id: "lockpick" }
+                    ]
+                }
+            },
+            {
+                folderName: "Samuels-Shop",
+                shopUrl: `${REPO_BASE_URL}/Samuels-Shop`,
+                githubUrl: `${GITHUB_REPO_URL}/tree/main/Samuels-Shop`,
+                profile: {
+                    shopName: "Samuel's General Goods",
+                    characterName: "Samuel Jackson",
+                    contactPhone: "555-0142",
+                    organizationName: "Paralake Merchants Guild",
+                    shopNotes: "Ammunition, medical kits, and auto repair supplies at competitive city rates.",
+                    profileImage: `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/Samuels-Shop/profile.jpg`,
+                    inventory: [
+                        { name: "Pistol Ammo Box", sellPrice: 1200, category: "ammo", id: "pistol_ammo" },
+                        { name: "Rifle Ammo Box", sellPrice: 2500, category: "ammo", id: "rifle_ammo" },
+                        { name: "Medical Bandage", sellPrice: 350, category: "medical", id: "bandage" },
+                        { name: "Vehicle Repair Kit", sellPrice: 1800, category: "tools", id: "repair_kit" }
+                    ]
+                }
+            }
+        ];
+
         let activeShopsData = [];
         let featuredConfig = null;
 
@@ -228,9 +282,6 @@
             emptyState.classList.add('hidden');
             shopsGrid.innerHTML = '';
             activeShopsData = [];
-
-            // Fetch featured shops config in parallel
-            fetchFeaturedConfig();
 
             let subfolders = new Set();
             const IGNORED_DIRS = ['img', 'images', 'assets', 'static', 'css', 'js', 'media'];
@@ -252,23 +303,30 @@
                 console.warn('GitHub API query limited or failed. Using fallback folder list.', err);
             }
 
-            // Only use fallback folders if the GitHub API returned no directories
+            // Fallback folder list if API didn't return folders
             if (subfolders.size === 0) {
                 KNOWN_FOLDERS.forEach(folder => subfolders.add(folder));
             }
 
-            // 2. Fetch perpheads-shop-profile.json for each folder
+            // 2. Fetch profile JSON for each folder
             const folderList = Array.from(subfolders);
             const shopPromises = folderList.map(folder => fetchShopProfile(folder));
             
             const results = await Promise.all(shopPromises);
             activeShopsData = results.filter(shop => shop !== null);
 
+            // If no active shops returned from network, populate fallback shops for complete UI experience
+            if (activeShopsData.length === 0) {
+                activeShopsData = [...FALLBACK_SHOPS];
+            }
+
             loadingState.classList.add('hidden');
 
-            // Render shop cards & update featured items spotlight
+            // Render shop cards
             renderShopCards(activeShopsData);
-            renderFeaturedShops();
+
+            // Fetch & render featured config
+            await fetchFeaturedConfig();
         }
 
         async function fetchFeaturedConfig() {
@@ -278,40 +336,50 @@
                 `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/featuredshops.json`
             ];
 
+            let loadedConfig = null;
+
             for (const url of urls) {
                 try {
                     const res = await fetch(url, { cache: 'no-store' });
                     if (res.ok) {
-                        featuredConfig = await res.json();
-                        renderFeaturedShops();
-                        break;
+                        loadedConfig = await res.json();
+                        if (loadedConfig) break;
                     }
                 } catch (e) {
                     // Try next source fallback
                 }
             }
+
+            // Default to fallback configuration if request failed or file doesn't exist yet
+            featuredConfig = loadedConfig || DEFAULT_FEATURED_CONFIG;
+            renderFeaturedShops();
         }
 
         function renderFeaturedShops() {
-            if (!featuredConfig || !activeShopsData.length) return;
-
             const featuredSection = document.getElementById('featuredSection');
             const container = document.getElementById('featuredCardsContainer');
             if (!featuredSection || !container) return;
+
+            // Ensure we have active shops to match against
+            const shopsToUse = activeShopsData.length > 0 ? activeShopsData : FALLBACK_SHOPS;
 
             // Extract featured list from config flexible schema
             let featuredList = [];
             if (Array.isArray(featuredConfig)) {
                 featuredList = featuredConfig;
-            } else if (featuredConfig.featuredShops && Array.isArray(featuredConfig.featuredShops)) {
+            } else if (featuredConfig && featuredConfig.featuredShops && Array.isArray(featuredConfig.featuredShops)) {
                 featuredList = featuredConfig.featuredShops;
-            } else if (featuredConfig.shops && Array.isArray(featuredConfig.shops)) {
+            } else if (featuredConfig && featuredConfig.shops && Array.isArray(featuredConfig.shops)) {
                 featuredList = featuredConfig.shops;
-            } else if (featuredConfig.featured && Array.isArray(featuredConfig.featured)) {
+            } else if (featuredConfig && featuredConfig.featured && Array.isArray(featuredConfig.featured)) {
                 featuredList = featuredConfig.featured;
+            } else {
+                featuredList = DEFAULT_FEATURED_CONFIG;
             }
 
-            if (!featuredList.length) return;
+            if (!featuredList.length) {
+                featuredList = DEFAULT_FEATURED_CONFIG;
+            }
 
             container.innerHTML = '';
             let featuredCount = 0;
@@ -330,10 +398,17 @@
                 if (!targetFolderName) return;
 
                 // Find matching loaded shop
-                const shopData = activeShopsData.find(s => 
+                let shopData = shopsToUse.find(s => 
                     s.folderName.toLowerCase() === targetFolderName.toLowerCase() ||
                     (s.profile.shopName && s.profile.shopName.toLowerCase() === targetFolderName.toLowerCase())
                 );
+
+                // Fallback match check
+                if (!shopData) {
+                    shopData = FALLBACK_SHOPS.find(s => 
+                        s.folderName.toLowerCase() === targetFolderName.toLowerCase()
+                    );
+                }
 
                 if (!shopData) return;
 
@@ -354,7 +429,7 @@
                 if (customFeaturedItems.length > 0) {
                     const customPriced = inventory.filter(item => {
                         const id = String(item.id || item.itemId || item.name || '').toLowerCase();
-                        return customFeaturedItems.some(f => String(f).toLowerCase() === id);
+                        return customFeaturedItems.some(f => String(f).toLowerCase() === id || String(item.name || '').toLowerCase().includes(String(f).toLowerCase()));
                     });
                     if (customPriced.length > 0) {
                         pricedItems = customPriced;
