@@ -982,6 +982,131 @@
             modal.classList.toggle('hidden');
         }
 
+        const supabaseClient = window.supabase.createClient(
+            'https://fzcmvrsdvgeeuopvxevw.supabase.co',
+            'sb_publishable_-9iSODq6vrqqmw7SNn7-Nw__GcvkapY'
+        );
+        let authMode = 'signin';
+
+        function openAuthModal() {
+            setAuthMode('signin');
+            const modal = document.getElementById('authModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('authEmail').focus();
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            showAuthMessage('', '');
+        }
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const isSignup = mode === 'signup';
+            const isReset = mode === 'reset';
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const password = document.getElementById('authPassword');
+            const confirmPassword = document.getElementById('authConfirmPassword');
+            const submitButton = document.getElementById('authSubmitButton');
+            const modeButton = document.getElementById('authModeButton');
+            const forgotButton = document.getElementById('forgotPasswordButton');
+
+            title.innerText = isSignup ? 'Create an account' : isReset ? 'Reset password' : 'Sign in';
+            subtitle.innerText = isSignup ? 'Create your Paralake Trading Network account.' : isReset ? 'We will email you a password reset link.' : 'Use your email and password.';
+            password.classList.toggle('hidden', isReset);
+            password.required = !isReset;
+            confirmPassword.classList.toggle('hidden', !isSignup);
+            confirmPassword.required = isSignup;
+            submitButton.innerText = isSignup ? 'Create Account' : isReset ? 'Send Reset Link' : 'Sign In';
+            modeButton.innerText = isSignup ? 'Already have an account?' : 'Create an account';
+            modeButton.onclick = () => setAuthMode(isSignup ? 'signin' : 'signup');
+            forgotButton.classList.toggle('hidden', isSignup || isReset);
+            forgotButton.onclick = () => setAuthMode('reset');
+            showAuthMessage('', '');
+        }
+
+        function showAuthMessage(message, type = 'error') {
+            const element = document.getElementById('authMessage');
+            element.innerText = message;
+            element.className = message
+                ? `text-xs rounded-lg p-3 ${type === 'success' ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-800' : 'bg-rose-950/70 text-rose-300 border border-rose-800'}`
+                : 'hidden text-xs rounded-lg p-3';
+        }
+
+        async function submitAuthForm(event) {
+            event.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const confirmPassword = document.getElementById('authConfirmPassword').value;
+            const submitButton = document.getElementById('authSubmitButton');
+
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-60', 'cursor-not-allowed');
+            showAuthMessage('', '');
+
+            try {
+                let result;
+                if (authMode === 'signup') {
+                    if (password !== confirmPassword) {
+                        throw new Error('Passwords do not match.');
+                    }
+                    result = await supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: { emailRedirectTo: window.location.href }
+                    });
+                    if (result.error) throw result.error;
+                    showAuthMessage('Account created. Check your email to verify your address.', 'success');
+                } else if (authMode === 'reset') {
+                    result = await supabaseClient.auth.resetPasswordForEmail(email, {
+                        redirectTo: window.location.href
+                    });
+                    if (result.error) throw result.error;
+                    showAuthMessage('Password reset instructions sent. Check your email.', 'success');
+                } else {
+                    result = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (result.error) throw result.error;
+                    closeAuthModal();
+                }
+            } catch (error) {
+                showAuthMessage(error.message || 'Unable to complete authentication.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.classList.remove('opacity-60', 'cursor-not-allowed');
+            }
+        }
+
+        async function signOutUser() {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) showAuthMessage(error.message);
+        }
+
+        function updateAuthControls(session) {
+            const authButton = document.getElementById('authButton');
+            const signOutButton = document.getElementById('signOutButton');
+            if (session?.user) {
+                authButton.classList.add('hidden');
+                signOutButton.classList.remove('hidden');
+                signOutButton.title = `Signed in as ${session.user.email}`;
+            } else {
+                authButton.classList.remove('hidden');
+                signOutButton.classList.add('hidden');
+                signOutButton.removeAttribute('title');
+            }
+        }
+
+        async function initializeAuth() {
+            const { data } = await supabaseClient.auth.getSession();
+            updateAuthControls(data.session);
+            supabaseClient.auth.onAuthStateChange((_event, session) => updateAuthControls(session));
+        }
+
+        initializeAuth();
+
         // Helper to sanitize text strings
         function escapeHtml(str) {
             if (!str) return '';
