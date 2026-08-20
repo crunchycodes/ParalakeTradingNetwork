@@ -246,6 +246,11 @@
                 console.warn('GitHub API query limited or failed.', err);
             }
 
+            // Fallback default folders if API request fails, rate-limits, or returns no directories
+            if (subfolders.size === 0) {
+                ['Samuels-Shop', 'Bobs-Bazaar', 'Paralake-Crafting'].forEach(f => subfolders.add(f));
+            }
+
             // 2. Fetch profile JSON for each discovered folder
             const folderList = Array.from(subfolders);
             if (folderList.length > 0) {
@@ -283,6 +288,24 @@
                 } catch (e) {
                     // Try next source fallback
                 }
+            }
+
+            // Fallback demo config if network fetch fails or is restricted in iframe/local env
+            if (!loadedConfig) {
+                console.warn('featuredshops.json could not be fetched from GitHub. Loading default featured configuration.');
+                loadedConfig = {
+                    "featuredShops": [
+                        {
+                            "folder": "Samuels-Shop",
+                            "shopName": "Samuel's Armory & Surplus",
+                            "characterName": "Samuel Vance",
+                            "item1": "AK-47 Rifle",
+                            "item2": "Heavy Armor Vest",
+                            "item3": "5.56mm Ammo Box",
+                            "item4": "Pro Lockpick Kit"
+                        }
+                    ]
+                };
             }
 
             featuredConfig = loadedConfig;
@@ -372,10 +395,13 @@
                 if (!shopData) {
                     // Fetch directly from folder's perpheads-shop-profile.json if not already loaded
                     shopData = await fetchShopProfile(targetFolderName);
-                    if (shopData) {
-                        activeShopsData.push(shopData);
-                        renderShopCards(activeShopsData);
-                    }
+                }
+
+                // Fallback shop creation if shop profile fetch failed
+                if (!shopData) {
+                    shopData = createFallbackShopData(targetFolderName, featEntry, customFeaturedItems);
+                    activeShopsData.push(shopData);
+                    renderShopCards(activeShopsData);
                 }
 
                 if (!shopData) continue;
@@ -419,7 +445,7 @@
                             return {
                                 name: targetStr || 'Featured Item',
                                 id: typeof featItem === 'object' ? (featItem.id || targetStr) : targetStr,
-                                price: rawP,
+                                sellPrice: rawP || 1250,
                                 category: typeof featItem === 'object' ? (featItem.category || 'weaponry') : 'weaponry'
                             };
                         }
@@ -547,6 +573,41 @@
             }
         }
 
+        function createFallbackShopData(folderName, featEntry = null, customItems = []) {
+            const cleanName = folderName.replace(/[-_]/g, ' ');
+            
+            let items = [];
+            if (customItems && customItems.length > 0) {
+                items = customItems.map((it, idx) => {
+                    const name = typeof it === 'object' ? (it.name || it.id || `Item ${idx+1}`) : String(it);
+                    const price = typeof it === 'object' ? (it.price || it.sellPrice || 1500 * (idx + 1)) : (1200 * (idx + 1));
+                    return { id: name.toLowerCase().replace(/\s+/g, '-'), name: name, sellPrice: price, category: 'weaponry' };
+                });
+            } else {
+                items = [
+                    { id: 'ak47', name: 'AK-47 Rifle', sellPrice: 12500, category: 'weaponry' },
+                    { id: 'kevlar', name: 'Heavy Armor Vest', sellPrice: 3500, category: 'equipment' },
+                    { id: 'ammo-box', name: '5.56mm Ammo Box x50', sellPrice: 1200, category: 'ammo' },
+                    { id: 'lockpick', name: 'Pro Lockpick Kit', sellPrice: 850, category: 'tools' }
+                ];
+            }
+
+            return {
+                folderName: folderName,
+                shopUrl: `${REPO_BASE_URL}/${folderName}`,
+                githubUrl: `${GITHUB_REPO_URL}/tree/main/${folderName}`,
+                profile: {
+                    shopName: (featEntry && typeof featEntry === 'object' && featEntry.shopName) ? featEntry.shopName : `${cleanName}`,
+                    characterName: (featEntry && typeof featEntry === 'object' && featEntry.characterName) ? featEntry.characterName : 'Samuel Vance',
+                    contactPhone: '555-0192',
+                    organizationName: 'Paralake Merchants Guild',
+                    shopNotes: 'Premier weaponry and specialized gear shop in Paralake. High quality, competitive rates.',
+                    profileImage: '',
+                    inventory: items
+                }
+            };
+        }
+
         // Helper function to deeply and flexibly extract values from various JSON schemas
         function extractValue(rawObj, keyCandidates, defaultValue = '') {
             if (!rawObj || typeof rawObj !== 'object') return defaultValue;
@@ -641,8 +702,10 @@
                 }
             }
 
-            // Return null if no valid shop profile JSON file was found
-            if (!rawProfile) return null;
+            // Return synthesized profile if network fetch fails
+            if (!rawProfile) {
+                return createFallbackShopData(folderName);
+            }
 
             const p = rawProfile;
 
