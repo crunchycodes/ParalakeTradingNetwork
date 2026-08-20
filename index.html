@@ -207,63 +207,6 @@
         const REPO_BASE_URL = `https://crunchycodes.github.io/${REPO_NAME}`;
         const GITHUB_REPO_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
         
-        // Default list of known shop subfolders used as fallback if API query fails
-        const KNOWN_FOLDERS = ['Bing-Bong', 'Samuels-Shop', 'Sams-Shop'];
-        
-        // Fallback featured config if featuredshops.json is missing or restricted by CORS/404
-        const DEFAULT_FEATURED_CONFIG = [
-            {
-                folder: "Bing-Bong",
-                items: ["AK-47", "M4A1", "Kevlar & Helmet", "Lockpick"]
-            },
-            {
-                folder: "Samuels-Shop",
-                items: ["Pistol Ammo", "Rifle Ammo", "Bandage", "Repair Kit"]
-            }
-        ];
-
-        // Fallback shop profiles with priced inventory for rich preview display
-        const FALLBACK_SHOPS = [
-            {
-                folderName: "Bing-Bong",
-                shopUrl: `${REPO_BASE_URL}/Bing-Bong`,
-                githubUrl: `${GITHUB_REPO_URL}/tree/main/Bing-Bong`,
-                profile: {
-                    shopName: "Bing Bong's Armory",
-                    characterName: "Bing Bong",
-                    contactPhone: "555-0199",
-                    organizationName: "Paralake Defense Corp",
-                    shopNotes: "Premium weaponry, body armor, and tactical gear. Bulk orders available upon request.",
-                    profileImage: `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/Bing-Bong/logo.png`,
-                    inventory: [
-                        { name: "AK-47", sellPrice: 12500, category: "weaponry", id: "ak47" },
-                        { name: "M4A1 Rifle", sellPrice: 15000, category: "weaponry", id: "m4a1" },
-                        { name: "Heavy Kevlar & Helmet", sellPrice: 3500, category: "equipment", id: "armor" },
-                        { name: "Lockpick Set", sellPrice: 850, category: "tools", id: "lockpick" }
-                    ]
-                }
-            },
-            {
-                folderName: "Samuels-Shop",
-                shopUrl: `${REPO_BASE_URL}/Samuels-Shop`,
-                githubUrl: `${GITHUB_REPO_URL}/tree/main/Samuels-Shop`,
-                profile: {
-                    shopName: "Samuel's General Goods",
-                    characterName: "Samuel Jackson",
-                    contactPhone: "555-0142",
-                    organizationName: "Paralake Merchants Guild",
-                    shopNotes: "Ammunition, medical kits, and auto repair supplies at competitive city rates.",
-                    profileImage: `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/Samuels-Shop/profile.jpg`,
-                    inventory: [
-                        { name: "Pistol Ammo Box", sellPrice: 1200, category: "ammo", id: "pistol_ammo" },
-                        { name: "Rifle Ammo Box", sellPrice: 2500, category: "ammo", id: "rifle_ammo" },
-                        { name: "Medical Bandage", sellPrice: 350, category: "medical", id: "bandage" },
-                        { name: "Vehicle Repair Kit", sellPrice: 1800, category: "tools", id: "repair_kit" }
-                    ]
-                }
-            }
-        ];
-
         let activeShopsData = [];
         let featuredConfig = null;
 
@@ -300,24 +243,15 @@
                     }
                 }
             } catch (err) {
-                console.warn('GitHub API query limited or failed. Using fallback folder list.', err);
+                console.warn('GitHub API query limited or failed.', err);
             }
 
-            // Fallback folder list if API didn't return folders
-            if (subfolders.size === 0) {
-                KNOWN_FOLDERS.forEach(folder => subfolders.add(folder));
-            }
-
-            // 2. Fetch profile JSON for each folder
+            // 2. Fetch profile JSON for each discovered folder
             const folderList = Array.from(subfolders);
-            const shopPromises = folderList.map(folder => fetchShopProfile(folder));
-            
-            const results = await Promise.all(shopPromises);
-            activeShopsData = results.filter(shop => shop !== null);
-
-            // If no active shops returned from network, populate fallback shops for complete UI experience
-            if (activeShopsData.length === 0) {
-                activeShopsData = [...FALLBACK_SHOPS];
+            if (folderList.length > 0) {
+                const shopPromises = folderList.map(folder => fetchShopProfile(folder));
+                const results = await Promise.all(shopPromises);
+                activeShopsData = results.filter(shop => shop !== null);
             }
 
             loadingState.classList.add('hidden');
@@ -325,15 +259,16 @@
             // Render shop cards
             renderShopCards(activeShopsData);
 
-            // Fetch & render featured config
+            // Fetch & render featured shops based on featuredshops.json
             await fetchFeaturedConfig();
         }
 
         async function fetchFeaturedConfig() {
+            const cacheBust = Date.now();
             const urls = [
-                './featuredshops.json',
-                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/featuredshops.json`,
-                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/featuredshops.json`
+                `./featuredshops.json?t=${cacheBust}`,
+                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/featuredshops.json?t=${cacheBust}`,
+                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/featuredshops.json?t=${cacheBust}`
             ];
 
             let loadedConfig = null;
@@ -350,73 +285,85 @@
                 }
             }
 
-            // Default to fallback configuration if request failed or file doesn't exist yet
-            featuredConfig = loadedConfig || DEFAULT_FEATURED_CONFIG;
-            renderFeaturedShops();
+            featuredConfig = loadedConfig;
+            await renderFeaturedShops();
         }
 
-        function renderFeaturedShops() {
+        async function renderFeaturedShops() {
             const featuredSection = document.getElementById('featuredSection');
             const container = document.getElementById('featuredCardsContainer');
             if (!featuredSection || !container) return;
 
-            // Ensure we have active shops to match against
-            const shopsToUse = activeShopsData.length > 0 ? activeShopsData : FALLBACK_SHOPS;
-
-            // Extract featured list from config flexible schema
-            let featuredList = [];
-            if (Array.isArray(featuredConfig)) {
-                featuredList = featuredConfig;
-            } else if (featuredConfig && featuredConfig.featuredShops && Array.isArray(featuredConfig.featuredShops)) {
-                featuredList = featuredConfig.featuredShops;
-            } else if (featuredConfig && featuredConfig.shops && Array.isArray(featuredConfig.shops)) {
-                featuredList = featuredConfig.shops;
-            } else if (featuredConfig && featuredConfig.featured && Array.isArray(featuredConfig.featured)) {
-                featuredList = featuredConfig.featured;
-            } else {
-                featuredList = DEFAULT_FEATURED_CONFIG;
+            if (!featuredConfig) {
+                featuredSection.classList.add('hidden');
+                return;
             }
 
-            if (!featuredList.length) {
-                featuredList = DEFAULT_FEATURED_CONFIG;
+            // Extract featured entries from shop1, shop2 keys or arrays
+            let featuredEntries = [];
+
+            if (Array.isArray(featuredConfig)) {
+                featuredEntries = featuredConfig;
+            } else if (typeof featuredConfig === 'object' && featuredConfig !== null) {
+                if (Array.isArray(featuredConfig.featuredShops)) {
+                    featuredEntries = featuredConfig.featuredShops;
+                } else if (Array.isArray(featuredConfig.shops)) {
+                    featuredEntries = featuredConfig.shops;
+                } else if (Array.isArray(featuredConfig.featured)) {
+                    featuredEntries = featuredConfig.featured;
+                } else {
+                    // Extract values for keys like shop1, shop2, shop3, etc.
+                    Object.entries(featuredConfig).forEach(([key, val]) => {
+                        if (val) featuredEntries.push(val);
+                    });
+                }
+            }
+
+            if (!featuredEntries.length) {
+                featuredSection.classList.add('hidden');
+                return;
             }
 
             container.innerHTML = '';
             let featuredCount = 0;
 
-            featuredList.forEach(featEntry => {
+            for (const featEntry of featuredEntries) {
                 let targetFolderName = '';
                 let customFeaturedItems = [];
 
                 if (typeof featEntry === 'string') {
                     targetFolderName = featEntry;
                 } else if (typeof featEntry === 'object' && featEntry !== null) {
-                    targetFolderName = featEntry.folder || featEntry.folderName || featEntry.shop || featEntry.shopName || featEntry.name || '';
+                    targetFolderName = featEntry.folder || featEntry.folderName || featEntry.shop || featEntry.shopName || featEntry.name || featEntry.path || '';
                     customFeaturedItems = featEntry.items || featEntry.featuredItems || featEntry.products || [];
                 }
 
-                if (!targetFolderName) return;
+                // Clean folder name string (remove leading/trailing slashes e.g. /Bing-Bong/)
+                targetFolderName = String(targetFolderName || '').trim().replace(/^\/+|\/+$/g, '');
+                if (!targetFolderName) continue;
 
-                // Find matching loaded shop
-                let shopData = shopsToUse.find(s => 
+                // Find or fetch matching shop profile
+                let shopData = activeShopsData.find(s => 
                     s.folderName.toLowerCase() === targetFolderName.toLowerCase() ||
                     (s.profile.shopName && s.profile.shopName.toLowerCase() === targetFolderName.toLowerCase())
                 );
 
-                // Fallback match check
                 if (!shopData) {
-                    shopData = FALLBACK_SHOPS.find(s => 
-                        s.folderName.toLowerCase() === targetFolderName.toLowerCase()
-                    );
+                    // Fetch directly from folder's perpheads-shop-profile.json if not already loaded
+                    shopData = await fetchShopProfile(targetFolderName);
+                    if (shopData) {
+                        activeShopsData.push(shopData);
+                        renderShopCards(activeShopsData);
+                    }
                 }
 
-                if (!shopData) return;
+                if (!shopData) continue;
 
                 const profile = shopData.profile;
                 const folder = shopData.folderName;
                 const shopUrl = `${REPO_BASE_URL}/${folder}`;
 
-                // Extract priced inventory items
+                // Extract priced inventory items from perpheads-shop-profile.json
                 let inventory = profile.inventory || [];
                 
                 // Filter to items with prices
@@ -425,28 +372,31 @@
                     return price !== null && price !== undefined && price !== '';
                 });
 
-                // If specific items were featured in featuredshops.json, prioritize or filter
+                // If specific items were specified in featuredshops.json, filter/prioritize them
                 if (customFeaturedItems.length > 0) {
                     const customPriced = inventory.filter(item => {
                         const id = String(item.id || item.itemId || item.name || '').toLowerCase();
-                        return customFeaturedItems.some(f => String(f).toLowerCase() === id || String(item.name || '').toLowerCase().includes(String(f).toLowerCase()));
+                        return customFeaturedItems.some(f => {
+                            const matchStr = String(typeof f === 'object' ? (f.id || f.name) : f).toLowerCase();
+                            return id === matchStr || String(item.name || '').toLowerCase().includes(matchStr);
+                        });
                     });
                     if (customPriced.length > 0) {
                         pricedItems = customPriced;
                     }
                 }
 
-                // Construct item elements HTML
+                // Construct item elements HTML with prices directly from perpheads-shop-profile.json
                 let itemsHtml = '';
                 if (pricedItems.length > 0) {
-                    itemsHtml = pricedItems.slice(0, 4).map(item => {
+                    itemsHtml = pricedItems.slice(0, 6).map(item => {
                         const itemName = escapeHtml(item.name || item.title || item.itemName || item.id || 'Item');
                         const rawPrice = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice ?? 0;
                         const formattedPrice = typeof rawPrice === 'number' ? `$${rawPrice.toLocaleString()}` : `$${rawPrice}`;
                         const itemId = item.id || item.itemId || item.name || '';
                         const category = item.category || item.type || 'weaponry';
 
-                        // Resolve image paths
+                        // Resolve image paths from repo /img/
                         let itemImg = item.image || item.imageUrl || item.icon || '';
                         if (!itemImg && itemId) {
                             itemImg = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/img/${category}/${itemId}.png`;
@@ -476,7 +426,7 @@
                 } else {
                     itemsHtml = `
                         <div class="col-span-2 text-xs text-slate-400 italic bg-slate-950/60 p-3 rounded-xl border border-slate-800/60">
-                            No listed items currently priced for this featured shop.
+                            No listed items currently priced in shop profile.
                         </div>
                     `;
                 }
@@ -519,7 +469,7 @@
                                     <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
                                     Featured Stock &amp; Prices
                                 </span>
-                                <span class="text-[11px] text-emerald-400 font-mono font-semibold">${pricedItems.length} Priced Items Available</span>
+                                <span class="text-[11px] text-emerald-400 font-mono font-semibold">${pricedItems.length} Priced Items</span>
                             </div>
                             
                             <!-- Items Grid -->
@@ -540,10 +490,12 @@
 
                 container.insertAdjacentHTML('beforeend', featuredCardHtml);
                 featuredCount++;
-            });
+            }
 
             if (featuredCount > 0) {
                 featuredSection.classList.remove('hidden');
+            } else {
+                featuredSection.classList.add('hidden');
             }
         }
 
