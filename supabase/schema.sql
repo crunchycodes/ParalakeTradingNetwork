@@ -121,6 +121,13 @@ create policy messages_member_read on public.messages for select using (public.i
 drop policy if exists messages_member_insert on public.messages;
 create policy messages_member_insert on public.messages for insert with check (sender_user_id = auth.uid() and public.is_conversation_member(conversation_id));
 
--- Add each repository folder manually after assigning its owner:
--- insert into public.shops (slug, display_name, owner_user_id)
--- values ('Samuels-Shop', 'Samuels Shop', 'OWNER-USER-UUID');
+-- Register repository shops after the core schema is created.
+insert into public.profiles (id)
+values ('2cb88bf0-a130-4794-af56-ed3ff5e9709a')
+on conflict (id) do nothing;
+
+insert into public.shops (slug, display_name, owner_user_id)
+values ('Samuels-Shop', 'Samuels Shop', '2cb88bf0-a130-4794-af56-ed3ff5e9709a')
+on conflict (slug) do update
+set display_name = excluded.display_name,
+    owner_user_id = excluded.owner_user_id;
