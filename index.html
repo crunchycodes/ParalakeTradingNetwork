@@ -74,51 +74,35 @@
                     <i class="fa-solid fa-store text-lg"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-emerald-400 transition-colors">
-                            Paralake Trading Network
-                        </span>
-                    </div>
-                    <p class="text-[11px] text-slate-400 font-medium">Independent Merchant Directory</p>
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+                        Paralake Trading Network
+                    </span>
                 </div>
-            </a>
-
-            <div class="flex items-center gap-3">
-                <a href="https://github.com/crunchycodes/ParalakeTradingNetwork" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-700 transition-all">
-                    <i class="fa-brands fa-github text-sm"></i>
-                    <span>GitHub Repo</span>
-                </a>
-                <button id="btnRefresh" onclick="loadAllShops()" class="inline-flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold px-3.5 py-2 rounded-xl border border-emerald-500/30 transition-all">
-                    <i class="fa-solid fa-arrows-rotate text-xs" id="refreshIcon"></i>
-                    <span>Refresh Shops</span>
-                </button>
+                <p class="text-[11px] text-slate-400 font-medium">Independent Merchant Directory</p>
             </div>
-        </div>
-    </header>
+        </a>
+    </div>
+</header>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+<!-- Main Content Area -->
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        <!-- Hero Welcome Section -->
-        <section class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl glow-emerald">
-            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute right-40 -top-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Hero Welcome Section -->
+    <section class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl glow-emerald">
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-40 -top-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="relative z-10 max-w-3xl space-y-4">
-                <div class="inline-flex items-center gap-2 bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Live Network Directory
-                </div>
+        <div class="relative z-10 max-w-3xl space-y-4">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                Browse All Active Shops in <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">Paralake</span>
+            </h2>
 
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                    Browse All Active Shops in <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">Paralake</span>
-                </h2>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Get directly in touch with local sellers and crafters. Deal directly with merchants across the city—no middleman, zero platform cut, and <strong>no 3rd parties taking their share of your profits</strong>.
+            </p>
 
-                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-                    Get directly in touch with local sellers and crafters. Deal directly with merchants across the city—no middleman, zero platform cut, and <strong>no 3rd parties taking their share of your profits</strong>.
-                </p>
-
-                <!-- Stats Cards -->
+            <!-- Stats Cards -->
                 <div class="pt-4 flex gap-4">
                     <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-3.5 min-w-[200px]">
                         <span class="text-xs text-slate-400 block font-medium">Total Shops Discovered</span>
@@ -129,22 +113,18 @@
         </section>
 
         <!-- Search and Filter Bar -->
-        <section class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
-            <div class="relative w-full md:w-96">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput" onkeyup="filterShops()" placeholder="Search by shop, owner, organization..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/80 focus:ring-1 focus:ring-emerald-500 transition-all">
-            </div>
+    <section class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
+        <div class="relative w-full md:w-96">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="searchInput" onkeyup="filterShops()" placeholder="Search by shop, owner, organization..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/80 focus:ring-1 focus:ring-emerald-500 transition-all">
+        </div>
 
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                <span id="resultsCounter" class="text-xs font-medium text-slate-400">Loading shops...</span>
-                <button onclick="toggleAddFolderModal()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl border border-slate-700 transition-all">
-                    <i class="fa-solid fa-plus text-emerald-400"></i>
-                    <span>Add Manual Subfolder</span>
-                </button>
-            </div>
-        </section>
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            <span id="resultsCounter" class="text-xs font-medium text-slate-400">Loading shops...</span>
+        </div>
+    </section>
 
-        <!-- Shops Directory Container Grid -->
+    <!-- Shops Directory Container Grid -->
         <section>
             <div id="shopsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Dynamic shop cards will be injected here -->
@@ -228,7 +208,7 @@
             const emptyState = document.getElementById('emptyState');
             const refreshIcon = document.getElementById('refreshIcon');
 
-            refreshIcon.classList.add('animate-spin');
+            if (refreshIcon) refreshIcon.classList.add('animate-spin');
             loadingState.classList.remove('hidden');
             emptyState.classList.add('hidden');
             shopsGrid.innerHTML = '';
@@ -266,21 +246,91 @@
             activeShopsData = results.filter(shop => shop !== null);
 
             loadingState.classList.add('hidden');
-            refreshIcon.classList.remove('animate-spin');
+            if (refreshIcon) refreshIcon.classList.remove('animate-spin');
 
             // Render shop cards
             renderShopCards(activeShopsData);
         }
 
+        // Helper function to deeply and flexibly extract values from various JSON schemas
+        function extractValue(rawObj, keyCandidates, defaultValue = '') {
+            if (!rawObj || typeof rawObj !== 'object') return defaultValue;
+
+            const normalizeKey = (str) => String(str).toLowerCase().replace(/[-_\s]/g, '');
+            const targetKeys = keyCandidates.map(normalizeKey);
+
+            const objectsToSearch = [rawObj];
+            const subObjectKeys = ['profile', 'owner', 'merchant', 'seller', 'shop', 'store', 'contact', 'details', 'data', 'meta', 'info', 'character', 'user'];
+
+            subObjectKeys.forEach(subKey => {
+                if (rawObj[subKey] && typeof rawObj[subKey] === 'object') {
+                    objectsToSearch.push(rawObj[subKey]);
+                }
+            });
+
+            for (const obj of objectsToSearch) {
+                if (!obj || typeof obj !== 'object') continue;
+
+                for (const [key, val] of Object.entries(obj)) {
+                    if (val === null || val === undefined) continue;
+                    
+                    const normKey = normalizeKey(key);
+                    if (targetKeys.includes(normKey)) {
+                        if (typeof val === 'string' || typeof val === 'number') {
+                            const strVal = String(val).trim();
+                            if (strVal.length > 0) return strVal;
+                        } else if (typeof val === 'object') {
+                            if (val.name && String(val.name).trim()) return String(val.name).trim();
+                            if (val.phone && String(val.phone).trim()) return String(val.phone).trim();
+                            if (val.number && String(val.number).trim()) return String(val.number).trim();
+                            if (val.text && String(val.text).trim()) return String(val.text).trim();
+                        }
+                    }
+                }
+            }
+
+            return defaultValue;
+        }
+
+        // Helper function to extract inventory items array from any schema
+        function extractInventory(rawObj) {
+            if (!rawObj || typeof rawObj !== 'object') return [];
+
+            const candidateKeys = ['inventory', 'items', 'stock', 'products', 'goods', 'catalog', 'itemList'];
+            const normalizeKey = (str) => String(str).toLowerCase().replace(/[-_\s]/g, '');
+            const targetKeys = candidateKeys.map(normalizeKey);
+
+            const objectsToSearch = [rawObj];
+            if (rawObj.shop && typeof rawObj.shop === 'object') objectsToSearch.push(rawObj.shop);
+            if (rawObj.profile && typeof rawObj.profile === 'object') objectsToSearch.push(rawObj.profile);
+            if (rawObj.data && typeof rawObj.data === 'object') objectsToSearch.push(rawObj.data);
+
+            for (const obj of objectsToSearch) {
+                for (const [key, val] of Object.entries(obj)) {
+                    if (targetKeys.includes(normalizeKey(key)) && Array.isArray(val)) {
+                        return val;
+                    }
+                }
+            }
+            return [];
+        }
+
         // Fetch JSON with fallback logic and flexible key resolution
         async function fetchShopProfile(folderName) {
-            // Priority sequence of JSON sources
-            const fetchUrls = [
-                `./${folderName}/perpheads-shop-profile.json`,
-                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${folderName}/perpheads-shop-profile.json`,
-                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/${folderName}/perpheads-shop-profile.json`,
-                `${REPO_BASE_URL}/${folderName}/perpheads-shop-profile.json`
+            const possibleFilenames = [
+                'perpheads-shop-profile.json',
+                'shop-profile.json',
+                'profile.json',
+                'shop.json'
             ];
+
+            const fetchUrls = [];
+            possibleFilenames.forEach(filename => {
+                fetchUrls.push(`./${folderName}/${filename}`);
+                fetchUrls.push(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${folderName}/${filename}`);
+                fetchUrls.push(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/${folderName}/${filename}`);
+                fetchUrls.push(`${REPO_BASE_URL}/${folderName}/${filename}`);
+            });
 
             let rawProfile = null;
 
@@ -298,29 +348,35 @@
 
             const p = rawProfile || {};
 
-            // Resolve relative profile image URLs (e.g., "logo.png" or "./avatar.jpg") to full GitHub path
-            let imgUrl = p.profileImage || p.shopImage || p.logo || p.avatar || '';
+            // Extract fields with exhaustive candidate keys
+            const defaultShopName = folderName.replace(/[-_]/g, ' ');
+            const shopName = extractValue(p, ['shopName', 'shop_name', 'storeName', 'store_name', 'shop', 'store', 'businessName', 'title', 'name'], defaultShopName);
+            const characterName = extractValue(p, ['characterName', 'character_name', 'character', 'charName', 'char_name', 'ownerName', 'owner_name', 'owner', 'merchantName', 'merchant_name', 'merchant', 'sellerName', 'seller_name', 'seller', 'playerName', 'player_name', 'player', 'author'], 'Unknown Merchant');
+            const contactPhone = extractValue(p, ['contactPhone', 'contact_phone', 'phoneNumber', 'phone_number', 'phone', 'contact', 'number', 'mobile', 'tel', 'cell'], 'N/A');
+            const organizationName = extractValue(p, ['organizationName', 'organization_name', 'organization', 'org', 'orgName', 'org_name', 'group', 'faction', 'clan'], '');
+            const shopNotes = extractValue(p, ['shopNotes', 'shop_notes', 'description', 'shopDescription', 'shop_description', 'notes', 'about', 'bio', 'tagline', 'summary', 'details', 'info', 'notice', 'text'], 'No description provided.');
+            let imgUrl = extractValue(p, ['profileImage', 'profile_image', 'shopImage', 'shop_image', 'logo', 'avatar', 'image', 'icon', 'picture'], '');
+
+            // Resolve relative profile image URLs to GitHub main branch path
             if (imgUrl && !imgUrl.startsWith('http://') && !imgUrl.startsWith('https://') && !imgUrl.startsWith('data:')) {
                 const cleanImg = imgUrl.replace(/^\.\//, '');
                 imgUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${folderName}/${cleanImg}`;
             }
 
-            // Normalize inventory items array across various JSON schemas
-            const rawInventory = p.inventory || p.items || p.stock || [];
-            const normalizedInventory = Array.isArray(rawInventory) ? rawInventory : [];
+            const inventory = extractInventory(p);
 
             return {
                 folderName: folderName,
                 shopUrl: `${REPO_BASE_URL}/${folderName}`,
                 githubUrl: `${GITHUB_REPO_URL}/tree/main/${folderName}`,
                 profile: {
-                    shopName: p.shopName || p.storeName || p.name || folderName.replace(/-/g, ' '),
-                    characterName: p.characterName || p.owner || p.ownerName || 'Unknown Merchant',
-                    contactPhone: p.contactPhone || p.phoneNumber || p.phone || 'N/A',
-                    organizationName: p.organizationName || p.organization || p.org || '',
-                    shopNotes: p.shopNotes || p.description || p.shopDescription || p.about || p.notes || 'No description provided.',
+                    shopName,
+                    characterName,
+                    contactPhone,
+                    organizationName,
+                    shopNotes,
                     profileImage: imgUrl,
-                    inventory: normalizedInventory
+                    inventory
                 }
             };
         }
@@ -351,7 +407,10 @@
                 // Calculate priced items count if items exist
                 let pricedItemsCount = 0;
                 if (profile.inventory && Array.isArray(profile.inventory)) {
-                    pricedItemsCount = profile.inventory.filter(i => (i.sellPrice !== null && i.sellPrice !== undefined) || (i.price !== null && i.price !== undefined)).length;
+                    pricedItemsCount = profile.inventory.filter(i => {
+                        const priceVal = i.sellPrice ?? i.price ?? i.cost ?? i.unitPrice;
+                        return priceVal !== null && priceVal !== undefined && priceVal !== '';
+                    }).length;
                 }
 
                 const cardHtml = `
@@ -360,20 +419,20 @@
                         <!-- Header / Info -->
                         <div class="space-y-4">
                             <div class="flex items-start justify-between gap-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center text-emerald-400 text-xl overflow-hidden font-bold shrink-0">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center text-emerald-400 text-xl overflow-hidden font-bold shrink-0 shadow-inner">
                                         ${profile.profileImage 
                                             ? `<img src="${escapeHtml(profile.profileImage)}" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\\'fa-solid fa-store\\'></i>';">`
                                             : `<i class="fa-solid fa-store"></i>`
                                         }
                                     </div>
-                                    <div class="min-w-0">
+                                    <div class="min-w-0 flex-1">
                                         <h3 class="font-bold text-lg text-white group-hover:text-emerald-400 transition-colors leading-snug truncate">
                                             ${escapeHtml(profile.shopName)}
                                         </h3>
-                                        <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5 truncate">
-                                            <i class="fa-solid fa-user text-slate-500 text-[10px]"></i>
-                                            <span>${escapeHtml(profile.characterName)}</span>
+                                        <p class="text-xs text-slate-300 font-semibold flex items-center gap-1.5 mt-0.5 truncate">
+                                            <i class="fa-solid fa-user text-emerald-400 text-[11px] shrink-0"></i>
+                                            <span class="truncate">${escapeHtml(profile.characterName)}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -382,14 +441,16 @@
                             <!-- Badges Grid -->
                             <div class="grid grid-cols-2 gap-2 text-xs">
                                 <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5">
-                                    <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Phone</span>
-                                    <span class="font-mono text-emerald-400 font-semibold truncate block mt-0.5">
+                                    <span class="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Phone</span>
+                                    <span class="font-mono text-emerald-400 font-bold truncate block mt-0.5">
+                                        <i class="fa-solid fa-phone text-[10px] mr-1 text-emerald-500/80"></i>
                                         ${escapeHtml(profile.contactPhone)}
                                     </span>
                                 </div>
                                 <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5">
-                                    <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Priced Items</span>
-                                    <span class="font-mono text-slate-200 font-semibold truncate block mt-0.5">
+                                    <span class="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Priced Items</span>
+                                    <span class="font-mono text-slate-200 font-bold truncate block mt-0.5">
+                                        <i class="fa-solid fa-boxes-stacked text-[10px] mr-1 text-slate-400"></i>
                                         ${pricedItemsCount} Available
                                     </span>
                                 </div>
@@ -403,20 +464,20 @@
                                 </div>
                             ` : ''}
 
-                            <!-- Notes Preview -->
-                            <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed italic bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/50">
-                                "${escapeHtml(profile.shopNotes)}"
-                            </p>
+                            <!-- Notes / Description Preview -->
+                            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/60 space-y-1">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Shop Description / Notes</span>
+                                <p class="text-xs text-slate-300 leading-relaxed italic line-clamp-3">
+                                    "${escapeHtml(profile.shopNotes)}"
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="pt-2 border-t border-slate-800/80 flex items-center gap-2">
-                            <a href="${shopPageUrl}" class="flex-grow inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all">
+                            <a href="${shopPageUrl}" class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all">
                                 <span>Visit Shop Page</span>
                                 <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </a>
-                            <a href="${githubDirUrl}" target="_blank" rel="noopener" title="View subfolder on GitHub" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl border border-slate-700 transition-colors">
-                                <i class="fa-brands fa-github text-sm"></i>
                             </a>
                         </div>
 
