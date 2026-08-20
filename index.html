@@ -163,6 +163,10 @@
                 <input id="profilePhone" type="tel" maxlength="30" placeholder="Phone number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
                 <input id="profileOrganization" type="text" maxlength="80" placeholder="Organization" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
                 <input id="profileAvatarUrl" type="url" maxlength="500" placeholder="Avatar image URL" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer">
+                    <input id="profileEmailNotifications" type="checkbox" class="h-4 w-4 rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500">
+                    <span>Send me email notifications for new invoices and messages</span>
+                </label>
                 <p id="profileMessage" class="hidden text-xs rounded-lg p-3"></p>
                 <button id="profileSaveButton" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm py-2.5 rounded-xl transition-colors">Save Profile</button>
             </form>
@@ -1140,6 +1144,12 @@
             document.getElementById('profilePhone').value = metadata.phone || '';
             document.getElementById('profileOrganization').value = metadata.organization || '';
             document.getElementById('profileAvatarUrl').value = metadata.avatar_url || '';
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('email_notifications')
+                .eq('id', data.user.id)
+                .maybeSingle();
+            document.getElementById('profileEmailNotifications').checked = profile?.email_notifications === true;
             showProfileMessage('', '');
 
             const modal = document.getElementById('profileModal');
@@ -1169,7 +1179,7 @@
             saveButton.classList.add('opacity-60', 'cursor-not-allowed');
             showProfileMessage('', '');
 
-            const { error } = await supabaseClient.auth.updateUser({
+            const { data: userData, error: userError } = await supabaseClient.auth.updateUser({
                 data: {
                     display_name: document.getElementById('profileDisplayName').value.trim(),
                     phone: document.getElementById('profilePhone').value.trim(),
@@ -1178,10 +1188,20 @@
                 }
             });
 
+            const profileError = userError || (await supabaseClient.from('profiles').upsert({
+                id: userData.user.id,
+                display_name: document.getElementById('profileDisplayName').value.trim(),
+                phone: document.getElementById('profilePhone').value.trim(),
+                organization: document.getElementById('profileOrganization').value.trim(),
+                avatar_url: document.getElementById('profileAvatarUrl').value.trim(),
+                email_notifications: document.getElementById('profileEmailNotifications').checked,
+                updated_at: new Date().toISOString()
+            })).error;
+
             saveButton.disabled = false;
             saveButton.classList.remove('opacity-60', 'cursor-not-allowed');
-            if (error) {
-                showProfileMessage(error.message);
+            if (profileError) {
+                showProfileMessage(profileError.message);
                 return;
             }
 

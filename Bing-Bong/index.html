@@ -91,7 +91,7 @@
                             <i class="fa-solid fa-user-tag text-emerald-400"></i> <span id="charName">---</span>
                         </p>
                         <div id="organizationInfo" class="hidden flex items-center gap-3">
-                            <img id="orgImage" src="" alt="Organization" class="w-12 h-12 rounded-xl object-contain" title="Organization">
+                            <img id="orgImage" src="" alt="Organization" class="w-48 h-48 rounded-xl object-contain" title="Organization">
                             <div>
                                 <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Organization</span>
                                 <span id="heroOrgName" class="text-sm font-semibold text-slate-200"></span>
@@ -579,10 +579,12 @@
 
         function getItemImageMarkup(item) {
             const itemId = encodeURIComponent(String(item.id || '').trim());
-            if (!itemId) return '';
+            const categorySlug = encodeURIComponent(String(item.category || '').trim().toLowerCase());
+            if (!itemId && !categorySlug) return '';
 
             const imagePaths = [
-                `../img/${encodeURIComponent(String(item.category || '').trim().toLowerCase())}/${itemId}.png`,
+                `../img/${categorySlug}/${itemId}.png`,
+                `../img/${categorySlug}/${categorySlug}.png`,
                 `../img/weaponry/${itemId}.png`,
                 `../img/chemical/${itemId}.png`,
                 `../img/${itemId}.png`
