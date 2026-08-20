@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
@@ -283,6 +284,10 @@
                     <button onclick="copyInvoiceToClipboard()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-lg shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 transition active:scale-95">
                         <i class="fa-solid fa-copy"></i>
                         <span>Copy Invoice to Clipboard</span>
+                    </button>
+                    <button onclick="sendInvoiceToProfile()" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-lg shadow-lg shadow-sky-950/50 flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Send Invoice to My Profile</span>
                     </button>
                 </div>
 
@@ -780,6 +785,61 @@
             } catch (err) {
                 showStatus('Unable to copy automatically.', 'error');
             }
+        }
+
+        const supabaseClient = window.supabase.createClient(
+            'https://fzcmvrsdvgeeuopvxevw.supabase.co',
+            'sb_publishable_-9iSODq6vrqqmw7SNn7-Nw__GcvkapY'
+        );
+
+        async function sendInvoiceToProfile() {
+            const { data: sessionData } = await supabaseClient.auth.getSession();
+            const user = sessionData.session?.user;
+            if (!user) {
+                showStatus('Please sign in on the main directory before sending an invoice to your profile.', 'error');
+                return;
+            }
+
+            const keys = Object.keys(cart);
+            if (keys.length === 0) {
+                showStatus('Add at least one item before sending an invoice.', 'error');
+                return;
+            }
+
+            const items = keys.map(id => {
+                const entry = cart[id];
+                const price = Number(entry.item.sellPrice) || 0;
+                return {
+                    id: String(entry.item.id),
+                    name: entry.item.name,
+                    category: entry.item.category || 'General',
+                    quantity: entry.qty,
+                    price,
+                    subtotal: price * entry.qty
+                };
+            });
+            const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+            const sellerUserId = String(shopData.profile?.owner || '').trim();
+            if (!sellerUserId) {
+                showStatus('This shop has no assigned owner, so the invoice cannot be sent yet.', 'error');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('invoices').insert({
+                shop_slug: 'Samuels-Shop',
+                buyer_user_id: user.id,
+                seller_user_id: sellerUserId,
+                items,
+                total,
+                status: 'pending'
+            });
+
+            if (error) {
+                showStatus(error.code === 'PGRST205' ? 'Invoices are not enabled yet. Run supabase/schema.sql first.' : error.message, 'error');
+                return;
+            }
+
+            showStatus('Invoice sent. You can view it from your Profile on the main directory.', 'success');
         }
 
         // Helper UI Notifications
