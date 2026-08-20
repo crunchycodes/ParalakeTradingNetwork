@@ -89,6 +89,10 @@
                     <i class="fa-solid fa-user text-xs"></i>
                     <span>Sign In</span>
                 </button>
+                <button id="profileButton" onclick="openProfileModal()" class="hidden inline-flex items-center gap-2 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-id-card text-xs"></i>
+                    <span>Profile</span>
+                </button>
                 <button id="signOutButton" onclick="signOutUser()" class="hidden inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition-all">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i>
                     <span>Sign Out</span>
@@ -139,6 +143,29 @@
                 <button id="authModeButton" onclick="setAuthMode('signup')" class="text-emerald-400 hover:underline">Create an account</button>
                 <button id="forgotPasswordButton" onclick="setAuthMode('reset')" class="text-slate-400 hover:text-white hover:underline">Forgot password?</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Your Profile</h2>
+                    <p class="text-xs text-slate-400 mt-1">Update the public details connected to your account.</p>
+                </div>
+                <button onclick="closeProfileModal()" class="text-slate-400 hover:text-white text-lg" aria-label="Close profile dialog">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="saveProfile(event)" class="space-y-3">
+                <input id="profileDisplayName" type="text" maxlength="80" placeholder="Display name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <input id="profilePhone" type="tel" maxlength="30" placeholder="Phone number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <input id="profileOrganization" type="text" maxlength="80" placeholder="Organization" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <input id="profileAvatarUrl" type="url" maxlength="500" placeholder="Avatar image URL" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <p id="profileMessage" class="hidden text-xs rounded-lg p-3"></p>
+                <button id="profileSaveButton" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm py-2.5 rounded-xl transition-colors">Save Profile</button>
+            </form>
         </div>
     </div>
 
@@ -1104,6 +1131,63 @@
             if (error) showAuthMessage(error.message || `Unable to sign in with ${provider}.`);
         }
 
+        async function openProfileModal() {
+            const { data, error } = await supabaseClient.auth.getUser();
+            if (error || !data.user) return;
+
+            const metadata = data.user.user_metadata || {};
+            document.getElementById('profileDisplayName').value = metadata.display_name || '';
+            document.getElementById('profilePhone').value = metadata.phone || '';
+            document.getElementById('profileOrganization').value = metadata.organization || '';
+            document.getElementById('profileAvatarUrl').value = metadata.avatar_url || '';
+            showProfileMessage('', '');
+
+            const modal = document.getElementById('profileModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('profileDisplayName').focus();
+        }
+
+        function closeProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function showProfileMessage(message, type = 'error') {
+            const element = document.getElementById('profileMessage');
+            element.innerText = message;
+            element.className = message
+                ? `text-xs rounded-lg p-3 ${type === 'success' ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-800' : 'bg-rose-950/70 text-rose-300 border border-rose-800'}`
+                : 'hidden text-xs rounded-lg p-3';
+        }
+
+        async function saveProfile(event) {
+            event.preventDefault();
+            const saveButton = document.getElementById('profileSaveButton');
+            saveButton.disabled = true;
+            saveButton.classList.add('opacity-60', 'cursor-not-allowed');
+            showProfileMessage('', '');
+
+            const { error } = await supabaseClient.auth.updateUser({
+                data: {
+                    display_name: document.getElementById('profileDisplayName').value.trim(),
+                    phone: document.getElementById('profilePhone').value.trim(),
+                    organization: document.getElementById('profileOrganization').value.trim(),
+                    avatar_url: document.getElementById('profileAvatarUrl').value.trim()
+                }
+            });
+
+            saveButton.disabled = false;
+            saveButton.classList.remove('opacity-60', 'cursor-not-allowed');
+            if (error) {
+                showProfileMessage(error.message);
+                return;
+            }
+
+            showProfileMessage('Profile saved.', 'success');
+        }
+
         async function signOutUser() {
             const { error } = await supabaseClient.auth.signOut();
             if (error) showAuthMessage(error.message);
@@ -1111,15 +1195,19 @@
 
         function updateAuthControls(session) {
             const authButton = document.getElementById('authButton');
+            const profileButton = document.getElementById('profileButton');
             const signOutButton = document.getElementById('signOutButton');
             if (session?.user) {
                 authButton.classList.add('hidden');
+                profileButton.classList.remove('hidden');
                 signOutButton.classList.remove('hidden');
                 signOutButton.title = `Signed in as ${session.user.email}`;
             } else {
                 authButton.classList.remove('hidden');
+                profileButton.classList.add('hidden');
                 signOutButton.classList.add('hidden');
                 signOutButton.removeAttribute('title');
+                closeProfileModal();
             }
         }
 
