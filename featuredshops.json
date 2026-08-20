@@ -9,13 +9,15 @@
       "shop": "1",
         "item1": "10x22mm Magazine (Walther P99)",
         "item2": "Kitted AK-101",
-        "item3": "Walther PPK (Loaded)"
+        "item3": "Walther PPK (Loaded)",
+        "item4": "9x19mm Magazine (Glock 17) (Loaded)"
     },
     {
       "shop": "2",
         "item1": "Walther PPK",
         "item2": "Kitted AK-101",
-        "item3": "Walther PPK (Loaded)"
+        "item3": "Walther PPK (Loaded)",
+        "item4": "9x19mm Magazine (Glock 17) (Loaded)"
     },
     {
       "shop": "3",
