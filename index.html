@@ -178,6 +178,10 @@
                     <span>Get Listed</span>
                 </a>
             </div>
+            <div class="border-t border-slate-800 pt-4 space-y-3">
+                <h3 class="text-sm font-bold text-white">Invoices</h3>
+                <div id="profileInvoicesList" class="space-y-2"></div>
+            </div>
         </div>
     </div>
 
@@ -1161,6 +1165,7 @@
                 .maybeSingle();
             document.getElementById('profileEmailNotifications').checked = profile?.email_notifications ?? metadata.email_notifications === true;
             renderProfileShops(data.user.id);
+            await renderProfileInvoices(data.user.id);
             showProfileMessage('', '');
 
             const modal = document.getElementById('profileModal');
@@ -1189,6 +1194,40 @@
                     <span class="font-semibold truncate">${escapeHtml(shop.profile.shopName || shop.folderName)}</span>
                     <i class="fa-solid fa-arrow-up-right-from-square text-emerald-400 shrink-0"></i>
                 </a>
+            `).join('');
+        }
+
+        async function renderProfileInvoices(userId) {
+            const invoicesList = document.getElementById('profileInvoicesList');
+            const { data: invoices, error } = await supabaseClient
+                .from('invoices')
+                .select('id, shop_slug, items, total, status, created_at')
+                .eq('buyer_user_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                invoicesList.innerHTML = error.code === 'PGRST205'
+                    ? '<p class="text-xs text-slate-400">Invoices will appear here after the database schema is enabled.</p>'
+                    : '<p class="text-xs text-rose-300">Unable to load invoices right now.</p>';
+                return;
+            }
+
+            if (!invoices?.length) {
+                invoicesList.innerHTML = '<p class="text-xs text-slate-400">No invoices have been sent to you yet.</p>';
+                return;
+            }
+
+            invoicesList.innerHTML = invoices.map(invoice => `
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-3 text-xs">
+                        <span class="font-semibold text-slate-200">${escapeHtml(invoice.shop_slug)}</span>
+                        <span class="text-emerald-400 font-mono font-bold">$${Number(invoice.total || 0).toLocaleString()}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3 text-[10px] text-slate-500">
+                        <span>${new Date(invoice.created_at).toLocaleString()}</span>
+                        <span class="uppercase font-bold text-slate-400">${escapeHtml(invoice.status)}</span>
+                    </div>
+                </div>
             `).join('');
         }
 
