@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PerpHeads Shop</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        },
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navbar -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xl">
+                    <i class="fa-solid me-0 fa-store"></i>
+                </div>
+                <div>
+                    <h1 id="navShopName" class="font-bold text-lg text-white leading-tight">PerpHeads Shop</h1>
+                    <p id="navOwner" class="text-xs text-slate-400">Loading shop profile...</p>
+                </div>
+            </div>
+
+            <!-- Quick Stats & Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="scrollToInvoice()" class="hidden sm:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-emerald-900/30 transition">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>View Cart & Invoice</span>
+                    <span id="cartBadgeCount" class="bg-emerald-950 text-emerald-300 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="reloadJson()" title="Reload JSON" class="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Notification / Status Banner -->
+        <div id="statusAlert" class="hidden rounded-xl p-4 border text-sm flex items-center justify-between transition">
+            <div class="flex items-center gap-3">
+                <i id="statusIcon" class="fa-solid fa-info-circle text-lg"></i>
+                <span id="statusMessage">Attempting to load perpheads-shop-profile.json...</span>
+            </div>
+            <button onclick="document.getElementById('statusAlert').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Shop Profile Card -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-16 -bottom-16 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+                
+                <!-- Left: Profile Info -->
+                <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                    <div class="relative">
+                        <img id="profileAvatar" src="https://placehold.co/120x120/1e293b/64748b?text=Profile" alt="Profile" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-lg bg-slate-800" onerror="this.src='https://placehold.co/120x120/1e293b/64748b?text=Profile'">
+                        <div id="orgBadgeContainer" class="absolute -bottom-2 -right-2 hidden">
+                            <img id="orgImage" src="" alt="Org" class="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 object-cover shadow-md" title="Organization">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h2 id="heroShopName" class="text-2xl sm:text-3xl font-extrabold text-white">Loading Shop...</h2>
+                            <span id="heroOrgName" class="hidden text-xs font-semibold px-2.5 py-1 bg-slate-800 border border-slate-700 text-slate-300 rounded-full"></span>
+                        </div>
+                        <p id="heroCharacter" class="text-slate-400 text-sm font-medium flex items-center gap-2">
+                            <i class="fa-solid fa-user-tag text-emerald-400"></i> <span id="charName">---</span>
+                        </p>
+                        <p id="heroDescription" class="text-slate-300 text-sm max-w-2xl leading-relaxed italic">
+                            Fetching shop details...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right: Contact & Banking Details Grid -->
+                <div class="w-full lg:w-auto grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+                    <div class="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block uppercase font-bold text-[10px]">Phone Number</span>
+                            <span id="contactPhone" class="font-mono text-slate-200 font-semibold">---</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block uppercase font-bold text-[10px]">Bank Account</span>
+                            <span id="contactBank" class="font-mono text-emerald-400 font-bold">---</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm">
+                            <i class="fa-brands fa-discord"></i>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block uppercase font-bold text-[10px]">Discord</span>
+                            <span id="contactDiscord" class="font-mono text-slate-200 font-semibold">---</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                        <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center text-sm">
+                            <i class="fa-brands fa-steam"></i>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block uppercase font-bold text-[10px]">Steam Profile</span>
+                            <a id="contactSteam" href="#" target="_blank" class="text-sky-400 hover:underline font-medium truncate max-w-[120px] inline-block">View Link</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Additional Services & Notes Banner -->
+            <div id="additionalInfoRow" class="mt-6 pt-6 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div id="servicesBox" class="bg-slate-950/40 p-3 rounded-lg border border-slate-800/50 hidden">
+                    <span class="text-emerald-400 font-semibold block mb-1"><i class="fa-solid fa-handshake-angle me-1"></i> Additional Services:</span>
+                    <span id="additionalServices" class="text-slate-300"></span>
+                </div>
+                <div id="shopNotesBox" class="bg-slate-950/40 p-3 rounded-lg border border-slate-800/50 hidden">
+                    <span class="text-amber-400 font-semibold block mb-1"><i class="fa-solid fa-circle-info me-1"></i> Shop Notes:</span>
+                    <span id="additionalShopInfo" class="text-slate-300"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls & Filters Bar -->
+        <section class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="filterItems()" placeholder="Search items..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
+            <!-- Category Tabs / Filter -->
+            <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 custom-scrollbar" id="categoryContainer">
+                <button onclick="setCategory('ALL')" class="category-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-500 transition whitespace-nowrap">
+                    All Items
+                </button>
+                <!-- Categories dynamically injected here -->
+            </div>
+
+            <!-- Sort By Selector -->
+            <div class="flex items-center gap-2 text-xs w-full md:w-auto justify-end">
+                <span class="text-slate-400 font-medium">Sort:</span>
+                <select id="sortSelect" onchange="filterItems()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 transition">
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Items Grid Section -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked text-emerald-400"></i> Available Catalog
+                </h3>
+                <span id="itemsCountBadge" class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+                    0 Items Priced
+                </span>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Dynamic Item Cards inserted here -->
+            </div>
+
+            <!-- Empty State Notice -->
+            <div id="emptyState" class="hidden py-16 text-center bg-slate-900/50 border border-slate-800 rounded-2xl">
+                <i class="fa-solid fa-store-slash text-4xl text-slate-600 mb-3 block"></i>
+                <h4 class="text-slate-300 font-bold text-lg mb-1">No Priced Items Available</h4>
+                <p class="text-slate-500 text-sm max-w-md mx-auto">
+                    There are no items matching your criteria or no items in this shop currently have a valid <code class="text-emerald-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">sellPrice</code> set.
+                </p>
+            </div>
+        </section>
+
+        <!-- Cart & Invoice Bottom Section -->
+        <section id="invoiceSection" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden scroll-mt-20">
+            <div class="flex flex-col lg:flex-row gap-8">
+                
+                <!-- Left: Shopping Cart Table -->
+                <div class="flex-grow space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="font-bold text-xl text-white flex items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping text-emerald-400"></i> Your Selected Cart
+                        </h3>
+                        <button onclick="clearCart()" class="text-xs text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1 transition">
+                            <i class="fa-solid fa-trash-can"></i> Clear Cart
+                        </button>
+                    </div>
+
+                    <!-- Cart Items Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase font-mono text-[10px]">
+                                <tr>
+                                    <th class="p-3 rounded-l-lg">Item Name</th>
+                                    <th class="p-3">Price</th>
+                                    <th class="p-3 text-center">Quantity</th>
+                                    <th class="p-3 text-right">Subtotal</th>
+                                    <th class="p-3 rounded-r-lg text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartTableBody" class="divide-y divide-slate-800/60">
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-500 italic">
+                                        Your cart is currently empty. Add items from the catalog above!
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cart Grand Total Display -->
+                    <div class="flex items-center justify-between bg-slate-950/80 p-4 rounded-xl border border-slate-800 mt-4">
+                        <span class="text-slate-400 font-semibold text-sm">Grand Total Amount:</span>
+                        <span id="cartGrandTotal" class="text-2xl font-mono font-extrabold text-emerald-400">$0</span>
+                    </div>
+                </div>
+
+                <!-- Right: Preformatted RP Invoice for Copying -->
+                <div class="w-full lg:w-96 bg-slate-950 rounded-xl p-5 border border-slate-800 flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-sm text-white uppercase font-mono tracking-wider">
+                                <i class="fa-solid fa-file-invoice text-emerald-400 me-1"></i> Formatted Invoice
+                            </h4>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-mono">Ready to Paste</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">Optional Customer Details for Invoice header:</p>
+
+                        <!-- Optional Customer Input fields -->
+                        <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                            <input type="text" id="custNameInput" oninput="updateInvoiceText()" placeholder="Customer Name" class="bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="custPhoneInput" oninput="updateInvoiceText()" placeholder="Customer Phone" class="bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                        </div>
+
+                        <!-- Raw Textarea for Preview/Copying -->
+                        <textarea id="invoiceTextarea" readonly class="w-full h-48 bg-slate-900 text-emerald-300 font-mono text-xs p-3 rounded-lg border border-slate-800 focus:outline-none custom-scrollbar resize-none"></textarea>
+                    </div>
+
+                    <!-- Copy Button -->
+                    <button onclick="copyInvoiceToClipboard()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-lg shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Invoice to Clipboard</span>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Manual File Upload Modal (Fallback if fetch fails) -->
+        <div id="jsonModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-lg text-white">Load Custom Shop JSON</h3>
+                    <button onclick="toggleModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p class="text-xs text-slate-400">
+                    If <code class="text-emerald-400">perpheads-shop-profile.json</code> could not be fetched automatically (e.g. running locally via local file system without a web server), you can upload it or paste raw JSON below.
+                </p>
+
+                <!-- File Input -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Select JSON File</label>
+                    <input type="file" id="jsonFileInput" accept=".json" onchange="handleFileUpload(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500">
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-800"></div>
+                    <span class="flex-shrink mx-2 text-slate-600 text-xs font-mono">OR PASTE JSON</span>
+                    <div class="flex-grow border-t border-slate-800"></div>
+                </div>
+
+                <!-- Textarea Paste -->
+                <div>
+                    <textarea id="jsonPasteTextarea" placeholder="Paste JSON structure here..." class="w-full h-32 bg-slate-950 text-xs font-mono p-3 text-slate-200 border border-slate-800 rounded-lg focus:outline-none focus:border-emerald-500 custom-scrollbar"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button onclick="toggleModal(false)" class="px-4 py-2 text-xs font-semibold bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+                    <button onclick="handlePasteSubmit()" class="px-4 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-500">Load Data</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500 mt-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>PerpHeads Shop Engine &bull; Designed for <code class="text-slate-400">perpheads-shop-profile.json</code></p>
+            <button onclick="toggleModal(true)" class="text-emerald-400 hover:underline"><i class="fa-solid fa-file-code me-1"></i> Load / Change JSON Source</button>
+        </div>
+    </footer>
+
+    <script>
+        // Global Application State
+        let shopData = {
+            profile: {},
+            items: []
+        };
+        let validItems = []; // Only items with non-null sellPrice
+        let activeCategory = 'ALL';
+        let cart = {}; // Key: itemId, Value: { item, qty }
+
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadShopJsonFromFileSystem();
+        });
+
+        // 1. Fetch JSON from relative path within same directory
+        async function loadShopJsonFromFileSystem() {
+            showStatus('Fetching perpheads-shop-profile.json from local directory...', 'info');
+            try {
+                // Fetch relative file in current directory
+                const response = await fetch('perpheads-shop-profile.json', { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                processShopData(data);
+                showStatus('Successfully loaded perpheads-shop-profile.json!', 'success');
+            } catch (err) {
+                console.warn('Could not auto-fetch perpheads-shop-profile.json:', err);
+                showStatus('Could not auto-load perpheads-shop-profile.json. Click "Load / Change JSON Source" at bottom or use upload modal.', 'error');
+                
+                // Fallback: Check if fallback sample can be loaded so UI isn't broken
+                initializeFallbackIfAvailable();
+            }
+        }
+
+        // 2. Process & Populate Shop Data
+        function processShopData(data) {
+            if (!data || !data.profile) {
+                showStatus('Invalid JSON structure. Missing "profile" key.', 'error');
+                return;
+            }
+
+            shopData = data;
+
+            // Filter items: ONLY display items where sellPrice != null and > 0
+            validItems = (data.items || []).filter(item => {
+                return item.sellPrice !== null && item.sellPrice !== undefined && Number(item.sellPrice) > 0;
+            });
+
+            // Populate Profile UI
+            renderProfile();
+
+            // Populate Categories
+            renderCategories();
+
+            // Render Items Grid
+            filterItems();
+
+            // Reset/Update Cart & Invoice
+            cart = {};
+            renderCart();
+        }
+
+        // Render Profile Details
+        function renderProfile() {
+            const p = shopData.profile || {};
+
+            // Titles & Names
+            document.getElementById('navShopName').innerText = p.shopName || 'PerpHeads Shop';
+            document.getElementById('heroShopName').innerText = p.shopName || 'PerpHeads Shop';
+            document.getElementById('navOwner').innerText = p.characterName ? `Owner: ${p.characterName}` : 'Shop Owner';
+            document.getElementById('charName').innerText = p.characterName || 'N/A';
+            document.getElementById('heroDescription').innerText = p.description || 'Welcome to our shop!';
+
+            // Images
+            if (p.profileImage) {
+                document.getElementById('profileAvatar').src = p.profileImage;
+            }
+            if (p.organizationImage) {
+                document.getElementById('orgImage').src = p.organizationImage;
+                document.getElementById('orgBadgeContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('orgBadgeContainer').classList.add('hidden');
+            }
+
+            // Organization Name
+            if (p.organizationName) {
+                const orgEl = document.getElementById('heroOrgName');
+                orgEl.innerText = p.organizationName;
+                orgEl.classList.remove('hidden');
+            }
+
+            // Contact Info
+            document.getElementById('contactPhone').innerText = p.phoneNumber || 'N/A';
+            document.getElementById('contactBank').innerText = p.bankInfo || 'N/A';
+            document.getElementById('contactDiscord').innerText = p.discordName || 'N/A';
+
+            const steamLink = document.getElementById('contactSteam');
+            if (p.steamName && p.steamName.startsWith('http')) {
+                steamLink.href = p.steamName;
+                steamLink.innerText = 'Profile Link';
+                steamLink.classList.remove('pointer-events-none', 'text-slate-500');
+            } else if (p.steamName) {
+                steamLink.innerText = p.steamName;
+                steamLink.removeAttribute('href');
+            } else {
+                steamLink.innerText = 'N/A';
+            }
+
+            // Additional Services & Notes
+            if (p.additionalServices) {
+                document.getElementById('additionalServices').innerText = p.additionalServices;
+                document.getElementById('servicesBox').classList.remove('hidden');
+            } else {
+                document.getElementById('servicesBox').classList.add('hidden');
+            }
+
+            if (p.additionalShopInfo) {
+                document.getElementById('additionalShopInfo').innerText = p.additionalShopInfo;
+                document.getElementById('shopNotesBox').classList.remove('hidden');
+            } else {
+                document.getElementById('shopNotesBox').classList.add('hidden');
+            }
+        }
+
+        // Render Categories Bar dynamically
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            
+            // Extract unique categories from valid items
+            const categories = Array.from(new Set(validItems.map(i => i.category || 'Uncategorized'))).sort();
+
+            // Clear extra category buttons
+            container.innerHTML = `
+                <button onclick="setCategory('ALL')" class="category-btn ${activeCategory === 'ALL' ? 'active bg-emerald-600 text-white' : 'bg-slate-950 text-slate-400 hover:text-white'} px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-800 transition whitespace-nowrap">
+                    All Items (${validItems.length})
+                </button>
+            `;
+
+            categories.forEach(cat => {
+                const count = validItems.filter(i => (i.category || 'Uncategorized') === cat).length;
+                const btn = document.createElement('button');
+                btn.onclick = () => setCategory(cat);
+                const isActive = activeCategory === cat;
+                btn.className = `category-btn ${isActive ? 'active bg-emerald-600 text-white border-emerald-500' : 'bg-slate-950 text-slate-400 hover:text-white border-slate-800'} px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition whitespace-nowrap`;
+                btn.innerText = `${cat} (${count})`;
+                container.appendChild(btn);
+            });
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderCategories();
+            filterItems();
+        }
+
+        // Filter & Sort Items for Display
+        function filterItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const sortVal = document.getElementById('sortSelect').value;
+
+            let items = validItems.filter(item => {
+                const matchesCat = activeCategory === 'ALL' || (item.category || 'Uncategorized') === activeCategory;
+                const matchesQuery = !query || item.name.toLowerCase().includes(query) || (item.category && item.category.toLowerCase().includes(query));
+                return matchesCat && matchesQuery;
+            });
+
+            // Sorting
+            items.sort((a, b) => {
+                if (sortVal === 'name-asc') return a.name.localeCompare(b.name);
+                if (sortVal === 'price-asc') return Number(a.sellPrice) - Number(b.sellPrice);
+                if (sortVal === 'price-desc') return Number(b.sellPrice) - Number(a.sellPrice);
+                return 0;
+            });
+
+            renderGrid(items);
+        }
+
+        // Render Item Cards
+        function renderGrid(items) {
+            const grid = document.getElementById('itemsGrid');
+            const empty = document.getElementById('emptyState');
+            const badge = document.getElementById('itemsCountBadge');
+
+            badge.innerText = `${validItems.length} Items Priced`;
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                empty.classList.remove('hidden');
+                grid.classList.add('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            items.forEach(item => {
+                const sellPrice = Number(item.sellPrice) || 0;
+                const craftCost = Number(item.craftCost) || 0;
+                const suggested = Number(item.suggestedPrice) || 0;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl p-4 flex flex-col justify-between transition duration-200 shadow-lg hover:shadow-emerald-950/20 group relative";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="text-[10px] font-semibold uppercase font-mono px-2 py-0.5 rounded bg-slate-950 text-emerald-400 border border-slate-800">
+                                ${escapeHtml(item.category || 'General')}
+                            </span>
+                            ${suggested > 0 ? `<span class="text-[10px] text-slate-500" title="Suggested Retail Price">Sug: $${suggested.toLocaleString()}</span>` : ''}
+                        </div>
+                        <h4 class="font-bold text-white text-sm group-hover:text-emerald-400 transition leading-snug mb-1">
+                            ${escapeHtml(item.name)}
+                        </h4>
+                        ${item.description ? `<p class="text-xs text-slate-400 line-clamp-2 mb-3">${escapeHtml(item.description)}</p>` : ''}
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-3">
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-xs text-slate-400">Price:</span>
+                            <span class="text-lg font-mono font-extrabold text-emerald-400">$${sellPrice.toLocaleString()}</span>
+                        </div>
+
+                        <!-- Quantity Selector & Add Button -->
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                                <button onclick="adjustCardQty('${item.id}', -1)" class="px-2.5 py-1 text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-bold">-</button>
+                                <input type="number" id="qty_input_${item.id}" value="1" min="1" max="999" class="w-10 text-center bg-transparent text-xs font-mono text-white focus:outline-none">
+                                <button onclick="adjustCardQty('${item.id}', 1)" class="px-2.5 py-1 text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-bold">+</button>
+                            </div>
+                            <button onclick="addToCartFromCard('${item.id}')" class="flex-grow bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1.5 px-3 rounded-lg shadow transition active:scale-95 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function adjustCardQty(id, delta) {
+            const input = document.getElementById(`qty_input_${id}`);
+            if (!input) return;
+            let val = parseInt(input.value) || 1;
+            val = Math.max(1, val + delta);
+            input.value = val;
+        }
+
+        // Shopping Cart Management
+        function addToCartFromCard(itemId) {
+            const item = validItems.find(i => i.id == itemId);
+            if (!item) return;
+
+            const qtyInput = document.getElementById(`qty_input_${itemId}`);
+            const qtyToAdd = Math.max(1, parseInt(qtyInput ? qtyInput.value : 1) || 1);
+
+            if (cart[itemId]) {
+                cart[itemId].qty += qtyToAdd;
+            } else {
+                cart[itemId] = {
+                    item: item,
+                    qty: qtyToAdd
+                };
+            }
+
+            renderCart();
+            
+            // Brief visual feedback toast
+            showStatus(`Added ${qtyToAdd}x ${item.name} to cart!`, 'success');
+        }
+
+        function updateCartQty(itemId, newQty) {
+            const qty = parseInt(newQty);
+            if (isNaN(qty) || qty <= 0) {
+                delete cart[itemId];
+            } else {
+                cart[itemId].qty = qty;
+            }
+            renderCart();
+        }
+
+        function removeFromCart(itemId) {
+            delete cart[itemId];
+            renderCart();
+        }
+
+        function clearCart() {
+            cart = {};
+            renderCart();
+        }
+
+        // Render Cart Table & Calculate Totals
+        function renderCart() {
+            const tbody = document.getElementById('cartTableBody');
+            const keys = Object.keys(cart);
+            let total = 0;
+            let totalItemsCount = 0;
+
+            if (keys.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-500 italic">
+                            Your cart is currently empty. Select items from the catalog above to build your order!
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('cartGrandTotal').innerText = '$0';
+                document.getElementById('cartBadgeCount').innerText = '0';
+                updateInvoiceText();
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            keys.forEach(id => {
+                const cartEntry = cart[id];
+                const item = cartEntry.item;
+                const qty = cartEntry.qty;
+                const price = Number(item.sellPrice) || 0;
+                const subtotal = price * qty;
+
+                total += subtotal;
+                totalItemsCount += qty;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-950/40 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">
+                        ${escapeHtml(item.name)}
+                        <span class="block text-[10px] text-slate-500">${escapeHtml(item.category || '')}</span>
+                    </td>
+                    <td class="p-3 font-mono text-slate-300">$${price.toLocaleString()}</td>
+                    <td class="p-3 text-center">
+                        <input type="number" min="1" value="${qty}" onchange="updateCartQty('${item.id}', this.value)" class="w-14 text-center bg-slate-950 border border-slate-800 rounded py-1 font-mono text-white text-xs focus:outline-none focus:border-emerald-500">
+                    </td>
+                    <td class="p-3 text-right font-mono font-bold text-emerald-400">$${subtotal.toLocaleString()}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="removeFromCart('${item.id}')" class="text-rose-400 hover:text-rose-300 p-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('cartGrandTotal').innerText = `$${total.toLocaleString()}`;
+            document.getElementById('cartBadgeCount').innerText = totalItemsCount;
+
+            updateInvoiceText();
+        }
+
+        // Formatted Text Invoice Generator
+        function updateInvoiceText() {
+            const p = shopData.profile || {};
+            const custName = document.getElementById('custNameInput').value.trim() || 'Valued Customer';
+            const custPhone = document.getElementById('custPhoneInput').value.trim() || 'N/A';
+            
+            const keys = Object.keys(cart);
+
+            let txt = `=====================================\n`;
+            txt += `      ${(p.shopName || 'PERPHEADS SHOP').toUpperCase()} INVOICE\n`;
+            txt += `=====================================\n`;
+            txt += `Customer Name : ${custName}\n`;
+            txt += `Customer Phone: ${custPhone}\n`;
+            txt += `Date          : ${new Date().toLocaleDateString()}\n`;
+            txt += `-------------------------------------\n`;
+
+            if (keys.length === 0) {
+                txt += ` [ No items selected in cart ]\n`;
+            } else {
+                let grandTotal = 0;
+                keys.forEach(id => {
+                    const entry = cart[id];
+                    const price = Number(entry.item.sellPrice) || 0;
+                    const subtotal = price * entry.qty;
+                    grandTotal += subtotal;
+                    txt += `• ${entry.qty}x ${entry.item.name}\n`;
+                    txt += `  @ $${price.toLocaleString()} ea = $${subtotal.toLocaleString()}\n`;
+                });
+                txt += `-------------------------------------\n`;
+                txt += `GRAND TOTAL : $${grandTotal.toLocaleString()}\n`;
+            }
+
+            txt += `-------------------------------------\n`;
+            txt += `PAYMENT / BANK INFO:\n`;
+            txt += `Bank Account : ${p.bankInfo || 'N/A'}\n`;
+            txt += `Payee Name   : ${p.characterName || 'N/A'}\n`;
+            txt += `Shop Phone   : ${p.phoneNumber || 'N/A'}\n`;
+            if (p.discordName) txt += `Discord      : ${p.discordName}\n`;
+            txt += `=====================================`;
+
+            document.getElementById('invoiceTextarea').value = txt;
+        }
+
+        // Copy Invoice with fallback
+        function copyInvoiceToClipboard() {
+            const textarea = document.getElementById('invoiceTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // Mobile support
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showStatus('Invoice text copied to clipboard!', 'success');
+                } else {
+                    showStatus('Copy command failed. Please copy manually from text box.', 'error');
+                }
+            } catch (err) {
+                showStatus('Unable to copy automatically.', 'error');
+            }
+        }
+
+        // Helper UI Notifications
+        function showStatus(msg, type = 'info') {
+            const alert = document.getElementById('statusAlert');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusMessage');
+
+            text.innerText = msg;
+            alert.classList.remove('hidden', 'bg-sky-950/80', 'border-sky-800', 'text-sky-300', 'bg-emerald-950/80', 'border-emerald-800', 'text-emerald-300', 'bg-rose-950/80', 'border-rose-800', 'text-rose-300');
+
+            if (type === 'success') {
+                alert.classList.add('bg-emerald-950/80', 'border-emerald-800', 'text-emerald-300');
+                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+            } else if (type === 'error') {
+                alert.classList.add('bg-rose-950/80', 'border-rose-800', 'text-rose-300');
+                icon.className = 'fa-solid fa-triangle-exclamation text-rose-400 text-lg';
+            } else {
+                alert.classList.add('bg-sky-950/80', 'border-sky-800', 'text-sky-300');
+                icon.className = 'fa-solid fa-circle-info text-sky-400 text-lg';
+            }
+
+            // Auto dismiss after 5s if success
+            if (type === 'success') {
+                setTimeout(() => alert.classList.add('hidden'), 5000);
+            }
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('jsonModal');
+            if (show) modal.classList.remove('hidden');
+            else modal.classList.add('hidden');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    processShopData(parsed);
+                    toggleModal(false);
+                    showStatus(`Loaded shop data from ${file.name}`, 'success');
+                } catch (err) {
+                    showStatus('Error parsing uploaded JSON file.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function handlePasteSubmit() {
+            const raw = document.getElementById('jsonPasteTextarea').value.trim();
+            if (!raw) return;
+
+            try {
+                const parsed = JSON.parse(raw);
+                processShopData(parsed);
+                toggleModal(false);
+                showStatus('Successfully loaded pasted shop JSON!', 'success');
+            } catch (err) {
+                showStatus('Invalid JSON format pasted.', 'error');
+            }
+        }
+
+        function reloadJson() {
+            loadShopJsonFromFileSystem();
+        }
+
+        function scrollToInvoice() {
+            document.getElementById('invoiceSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function initializeFallbackIfAvailable() {
+            // Sample fallback data for preview if JSON fetch fails locally without server
+            const fallbackSample = {
+                "profile": {
+                    "characterName": "Samuel Soup",
+                    "shopName": "Sams Shop",
+                    "steamName": "https://steamcommunity.com/id/crunchy_soup/",
+                    "discordName": "crunch_soup",
+                    "phoneNumber": "610-5716",
+                    "bankInfo": "785236842",
+                    "description": "Buy all and any of your goods here!",
+                    "additionalServices": "Rides, Connections, Careers",
+                    "additionalShopInfo": "Mason helps me run this",
+                    "profileImage": "https://i.imgur.com/5eFgvdc.png",
+                    "organizationName": "Money Getters",
+                    "organizationImage": "https://i.imgur.com/gpzs7Ux.png"
+                },
+                "items": [
+                    { "id": "201", "name": "Bandage", "category": "Medical", "craftCost": 585, "suggestedPrice": 1000, "sellPrice": 1000 },
+                    { "id": "56", "name": "Baseball Bat", "category": "Melee", "craftCost": 500, "suggestedPrice": 800, "sellPrice": 850 },
+                    { "id": "2001", "name": "9x19mm Magazine (Beretta M9)", "category": "Magazines", "craftCost": 800, "suggestedPrice": 910, "sellPrice": 950 },
+                    { "id": "32", "name": "00 Buckshot", "category": "Ammunition", "craftCost": 1000, "suggestedPrice": 1150, "sellPrice": null }
+                ]
+            };
+            processShopData(fallbackSample);
+        }
+    </script>
+</body>
+</html>
