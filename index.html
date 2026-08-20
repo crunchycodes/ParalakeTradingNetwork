@@ -290,19 +290,35 @@
                 }
             }
 
-            // Fallback demo config if network fetch fails or is restricted in iframe/local env
+            // Fallback demo config matching exact repository structure
             if (!loadedConfig) {
                 console.warn('featuredshops.json could not be fetched from GitHub. Loading default featured configuration.');
                 loadedConfig = {
-                    "featuredShops": [
+                    "featuredshops": {
+                        "shop1": "Bing-Bong",
+                        "shop2": "Masons-Shop",
+                        "shop3": "Samuels-Shop"
+                    },
+                    "items": [
                         {
-                            "folder": "Samuels-Shop",
-                            "shopName": "Samuel's Armory & Surplus",
-                            "characterName": "Samuel Vance",
-                            "item1": "AK-47 Rifle",
-                            "item2": "Heavy Armor Vest",
-                            "item3": "5.56mm Ammo Box",
-                            "item4": "Pro Lockpick Kit"
+                            "shop": "1",
+                            "item1": "10x22mm Magazine (Walther P99)",
+                            "item2": "Kitted AK-101",
+                            "item3": "Walther PPK (Loaded)",
+                            "item4": "9x19mm Magazine (Glock 17) (Loaded)"
+                        },
+                        {
+                            "shop": "2",
+                            "item1": "Walther PPK",
+                            "item2": "Kitted AK-101",
+                            "item3": "Walther PPK (Loaded)",
+                            "item4": "9x19mm Magazine (Glock 17) (Loaded)"
+                        },
+                        {
+                            "shop": "3",
+                            "item1": "10x22mm Magazine (Walther P99)",
+                            "item2": "9x19mm Magazine (Glock 17) (Loaded)",
+                            "item3": "Walther PPK (Loaded)"
                         }
                     ]
                 };
@@ -322,27 +338,58 @@
                 return;
             }
 
-            // Extract featured entries from shop1, shop2 keys or arrays
-            let featuredEntries = [];
-
-            if (Array.isArray(featuredConfig)) {
-                featuredEntries = featuredConfig;
-            } else if (typeof featuredConfig === 'object' && featuredConfig !== null) {
-                if (Array.isArray(featuredConfig.featuredShops)) {
-                    featuredEntries = featuredConfig.featuredShops;
-                } else if (Array.isArray(featuredConfig.shops)) {
-                    featuredEntries = featuredConfig.shops;
-                } else if (Array.isArray(featuredConfig.featured)) {
-                    featuredEntries = featuredConfig.featured;
-                } else {
-                    // Extract values for keys like shop1, shop2, shop3, etc.
-                    Object.entries(featuredConfig).forEach(([key, val]) => {
-                        if (val) featuredEntries.push(val);
-                    });
+            // Helper to extract property flexibly across key variations
+            function getProp(obj, propNames) {
+                if (!obj || typeof obj !== 'object') return null;
+                for (const p of propNames) {
+                    for (const k of Object.keys(obj)) {
+                        if (k.toLowerCase() === p.toLowerCase()) return obj[k];
+                    }
                 }
+                return null;
             }
 
-            if (!featuredEntries.length) {
+            let shopsList = [];
+            const rawShops = getProp(featuredConfig, ['featuredshops', 'featuredShops', 'shops', 'featured']);
+            const rawItemsArray = getProp(featuredConfig, ['items', 'featuredItems', 'products']) || [];
+
+            if (rawShops) {
+                if (Array.isArray(rawShops)) {
+                    rawShops.forEach((entry, idx) => {
+                        const shopNum = String(idx + 1);
+                        if (typeof entry === 'string') {
+                            shopsList.push({ folder: entry, shopNum: shopNum, shopKey: `shop${shopNum}`, entryObj: null });
+                        } else if (typeof entry === 'object' && entry !== null) {
+                            const folder = entry.folder || entry.folderName || entry.shop || entry.shopName || entry.name || entry.path || '';
+                            const num = entry.shop || entry.shopId || entry.id || shopNum;
+                            shopsList.push({ folder: String(folder), shopNum: String(num), shopKey: `shop${num}`, entryObj: entry });
+                        }
+                    });
+                } else if (typeof rawShops === 'object') {
+                    Object.entries(rawShops).forEach(([key, val]) => {
+                        const numMatch = key.match(/\d+/);
+                        const shopNum = numMatch ? numMatch[0] : key;
+                        if (typeof val === 'string') {
+                            shopsList.push({ folder: val, shopNum: String(shopNum), shopKey: key, entryObj: null });
+                        } else if (typeof val === 'object' && val !== null) {
+                            const folder = val.folder || val.folderName || val.shop || val.shopName || val.name || key;
+                            shopsList.push({ folder: String(folder), shopNum: String(shopNum), shopKey: key, entryObj: val });
+                        }
+                    });
+                }
+            } else if (Array.isArray(featuredConfig)) {
+                featuredConfig.forEach((entry, idx) => {
+                    const shopNum = String(idx + 1);
+                    if (typeof entry === 'string') {
+                        shopsList.push({ folder: entry, shopNum: shopNum, shopKey: `shop${shopNum}`, entryObj: null });
+                    } else if (typeof entry === 'object' && entry !== null) {
+                        const folder = entry.folder || entry.folderName || entry.shop || entry.shopName || entry.name || '';
+                        shopsList.push({ folder: String(folder), shopNum: shopNum, shopKey: `shop${shopNum}`, entryObj: entry });
+                    }
+                });
+            }
+
+            if (!shopsList.length) {
                 featuredSection.classList.add('hidden');
                 return;
             }
@@ -350,41 +397,40 @@
             container.innerHTML = '';
             let featuredCount = 0;
 
-            for (const featEntry of featuredEntries) {
-                let targetFolderName = '';
+            for (const shopItem of shopsList) {
+                let targetFolderName = String(shopItem.folder || '').trim().replace(/^\/+|\/+$/g, '');
+                if (!targetFolderName) continue;
+
                 let customFeaturedItems = [];
 
-                if (typeof featEntry === 'string') {
-                    targetFolderName = featEntry;
-                } else if (typeof featEntry === 'object' && featEntry !== null) {
-                    targetFolderName = featEntry.folder || featEntry.folderName || featEntry.shop || featEntry.shopName || featEntry.name || featEntry.path || '';
-                    
-                    // Extract item1, item2, item3, item4... keys explicitly
+                // 1. Items defined directly inside shop entry object
+                if (shopItem.entryObj) {
                     for (let i = 1; i <= 10; i++) {
-                        const itemVal = featEntry[`item${i}`] || featEntry[`Item${i}`];
-                        if (itemVal) {
-                            customFeaturedItems.push(itemVal);
-                        }
+                        const itemVal = shopItem.entryObj[`item${i}`] || shopItem.entryObj[`Item${i}`];
+                        if (itemVal) customFeaturedItems.push(itemVal);
                     }
-
-                    if (Array.isArray(featEntry.items)) customFeaturedItems.push(...featEntry.items);
-                    if (Array.isArray(featEntry.featuredItems)) customFeaturedItems.push(...featEntry.featuredItems);
-                    if (Array.isArray(featEntry.products)) customFeaturedItems.push(...featEntry.products);
+                    if (Array.isArray(shopItem.entryObj.items)) customFeaturedItems.push(...shopItem.entryObj.items);
                 }
 
-                // Fallback to top-level item1..item4 if entry is simple string
-                if (customFeaturedItems.length === 0 && typeof featuredConfig === 'object' && featuredConfig !== null) {
-                    for (let i = 1; i <= 10; i++) {
-                        const itemVal = featuredConfig[`item${i}`] || featuredConfig[`Item${i}`];
-                        if (itemVal) {
-                            customFeaturedItems.push(itemVal);
+                // 2. Items mapped via top-level "items" array matching shop id/number/key
+                if (Array.isArray(rawItemsArray)) {
+                    const matchedItemGroup = rawItemsArray.find(it => {
+                        if (!it || typeof it !== 'object') return false;
+                        const itemShop = String(it.shop || it.shopId || it.id || it.shopKey || '').toLowerCase();
+                        const sNum = shopItem.shopNum.toLowerCase();
+                        const sKey = shopItem.shopKey.toLowerCase();
+                        const sFolder = targetFolderName.toLowerCase();
+                        return itemShop === sNum || itemShop === sKey || itemShop === sFolder || itemShop === `shop${sNum}`;
+                    });
+
+                    if (matchedItemGroup) {
+                        for (let i = 1; i <= 10; i++) {
+                            const itemVal = matchedItemGroup[`item${i}`] || matchedItemGroup[`Item${i}`];
+                            if (itemVal) customFeaturedItems.push(itemVal);
                         }
+                        if (Array.isArray(matchedItemGroup.items)) customFeaturedItems.push(...matchedItemGroup.items);
                     }
                 }
-
-                // Clean folder name string (remove leading/trailing slashes e.g. /Bing-Bong/)
-                targetFolderName = String(targetFolderName || '').trim().replace(/^\/+|\/+$/g, '');
-                if (!targetFolderName) continue;
 
                 // Find or fetch matching shop profile
                 let shopData = activeShopsData.find(s => 
@@ -393,13 +439,11 @@
                 );
 
                 if (!shopData) {
-                    // Fetch directly from folder's perpheads-shop-profile.json if not already loaded
                     shopData = await fetchShopProfile(targetFolderName);
                 }
 
-                // Fallback shop creation if shop profile fetch failed
                 if (!shopData) {
-                    shopData = createFallbackShopData(targetFolderName, featEntry, customFeaturedItems);
+                    shopData = createFallbackShopData(targetFolderName, shopItem.entryObj, customFeaturedItems);
                     activeShopsData.push(shopData);
                     renderShopCards(activeShopsData);
                 }
@@ -410,24 +454,20 @@
                 const folder = shopData.folderName;
                 const shopUrl = `${REPO_BASE_URL}/${folder}`;
 
-                // Extract full inventory from shop profile
                 let inventory = profile.inventory || [];
                 let itemsToShow = [];
 
                 if (customFeaturedItems.length > 0) {
-                    // Match each item1..item4 against the shop's inventory
                     itemsToShow = customFeaturedItems.map(featItem => {
                         const targetStr = String(typeof featItem === 'object' ? (featItem.name || featItem.id || featItem.title || '') : featItem).trim();
                         const targetLower = targetStr.toLowerCase();
 
-                        // Exact match search by ID or Name
                         let match = inventory.find(inv => {
                             const invId = String(inv.id || inv.itemId || '').toLowerCase();
                             const invName = String(inv.name || inv.title || inv.itemName || '').toLowerCase();
                             return (invId && invId === targetLower) || (invName && invName === targetLower);
                         });
 
-                        // Partial match search
                         if (!match) {
                             match = inventory.find(inv => {
                                 const invId = String(inv.id || inv.itemId || '').toLowerCase();
@@ -440,37 +480,33 @@
                         if (match) {
                             return match;
                         } else {
-                            // Construct representation if not explicitly matched in inventory
                             const rawP = typeof featItem === 'object' ? (featItem.sellPrice ?? featItem.price ?? featItem.cost ?? null) : null;
                             return {
                                 name: targetStr || 'Featured Item',
                                 id: typeof featItem === 'object' ? (featItem.id || targetStr) : targetStr,
-                                sellPrice: rawP || 1250,
+                                sellPrice: rawP || 'Inquire',
                                 category: typeof featItem === 'object' ? (featItem.category || 'weaponry') : 'weaponry'
                             };
                         }
                     });
                 } else {
-                    // Fallback to all priced items in shop inventory
                     itemsToShow = inventory.filter(item => {
                         const price = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice;
                         return price !== null && price !== undefined && price !== '';
                     });
                 }
 
-                // Construct item elements HTML
                 let itemsHtml = '';
                 if (itemsToShow.length > 0) {
                     itemsHtml = itemsToShow.slice(0, 4).map(item => {
                         const itemName = escapeHtml(item.name || item.title || item.itemName || item.id || 'Item');
                         const rawPrice = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice;
-                        const formattedPrice = (rawPrice !== null && rawPrice !== undefined && rawPrice !== '') 
-                            ? (typeof rawPrice === 'number' ? `$${rawPrice.toLocaleString()}` : `$${rawPrice}`) 
+                        const formattedPrice = (rawPrice !== null && rawPrice !== undefined && rawPrice !== '' && rawPrice !== 'Inquire') 
+                            ? (typeof rawPrice === 'number' ? `$${rawPrice.toLocaleString()}` : (String(rawPrice).startsWith('$') ? rawPrice : `$${rawPrice}`)) 
                             : 'Inquire';
                         const itemId = item.id || item.itemId || item.name || '';
                         const category = item.category || item.type || 'weaponry';
 
-                        // Resolve image paths from repo /img/
                         let itemImg = item.image || item.imageUrl || item.icon || '';
                         if (!itemImg && itemId) {
                             itemImg = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/img/${category}/${itemId}.png`;
@@ -507,10 +543,8 @@
 
                 const featuredCardHtml = `
                     <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border-2 border-amber-500/30 hover:border-amber-500/60 rounded-2xl p-5 shadow-xl relative overflow-hidden transition-all duration-300 group">
-                        <!-- Top Accent Glow -->
                         <div class="absolute -top-12 -right-12 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-                        <!-- Header Info -->
                         <div class="flex items-start justify-between gap-4 border-b border-slate-800/80 pb-4 mb-4">
                             <div class="flex items-center gap-3.5 min-w-0">
                                 <div class="w-14 h-14 rounded-2xl bg-slate-950 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl overflow-hidden font-bold shrink-0 shadow-lg shadow-amber-500/10">
@@ -536,23 +570,20 @@
                             </div>
                         </div>
 
-                        <!-- Featured Stock Showcase Header -->
                         <div class="space-y-2 mb-4">
                             <div class="flex items-center justify-between text-xs">
                                 <span class="font-bold text-slate-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                                     <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
-                                    Featured Items (item1–item4)
+                                    Featured Items
                                 </span>
                                 <span class="text-[11px] text-emerald-400 font-mono font-semibold">${itemsToShow.length} Featured Items</span>
                             </div>
                             
-                            <!-- Items Grid -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                 ${itemsHtml}
                             </div>
                         </div>
 
-                        <!-- Visit Shop Button -->
                         <div class="pt-2">
                             <a href="${shopUrl}" class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-amber-500/10 transition-all">
                                 <span>Visit Featured Shop</span>
