@@ -356,7 +356,7 @@
                 </div>
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-right min-w-[200px]">
                     <span class="text-[11px] text-slate-400 uppercase font-bold tracking-wider block">Estimated Total</span>
-                    <span id="calcTotalCost" class="text-3xl font-black font-mono text-emerald-400">$20,000</span>
+                    <span id="calcTotalCost" class="text-3xl font-black font-mono text-emerald-400">$0</span>
                 </div>
             </div>
 
@@ -396,18 +396,10 @@
                                 <div>
                                     <div class="text-xs font-bold text-white flex items-center gap-1.5">
                                         <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-                                        Featured Shop Spotlight ($25,000/wk)
+                                        Featured Shop Spotlight ($25,000)
                                     </div>
-                                    <div class="text-[11px] text-slate-400">Pin store card to top banner showcase</div>
+                                    <div class="text-[11px] text-slate-400">Pin store card to top banner showcase for 7 days</div>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <select id="featuredWeeks" onchange="updateCalculator()" disabled class="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-amber-500 disabled:opacity-50">
-                                    <option value="1">1 Week</option>
-                                    <option value="2">2 Weeks</option>
-                                    <option value="3">3 Weeks</option>
-                                    <option value="4">4 Weeks</option>
-                                </select>
                             </div>
                         </div>
 
@@ -418,17 +410,10 @@
                                 <div>
                                     <div class="text-xs font-bold text-white flex items-center gap-1.5">
                                         <i class="fa-solid fa-wrench text-blue-400 text-xs"></i>
-                                        Future Stock / Price Refresh ($5,000/ea)
+                                        Future Stock / Price Refresh ($5,000)
                                     </div>
-                                    <div class="text-[11px] text-slate-400">Pre-pay updates for stock or price changes</div>
+                                    <div class="text-[11px] text-slate-400">Pre-pay one update for stock or price changes</div>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <select id="updateCount" onchange="updateCalculator()" disabled class="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-blue-500 disabled:opacity-50">
-                                    <option value="1">1 Update</option>
-                                    <option value="2">2 Updates</option>
-                                    <option value="3">3 Updates</option>
-                                </select>
                             </div>
                         </div>
 
@@ -549,68 +534,6 @@
             </div>
         </section>
 
-        <!-- Listing Requirements & Submission Checklist -->
-        <section class="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
-            <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg">
-                    <i class="fa-solid fa-clipboard-check"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-white">Shop Submission Checklist</h2>
-                    <p class="text-xs text-slate-400">Have these details ready when filling out your registration.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-dot text-emerald-400 text-xs mt-1"></i>
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Shop &amp; Folder Name</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">e.g., <code>Samuels-Shop</code> or <code>Bobs-Bazaar</code></p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-dot text-emerald-400 text-xs mt-1"></i>
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Character &amp; Owner Name</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Your official character name in Paralake.</p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-dot text-emerald-400 text-xs mt-1"></i>
-                    <div>
-                        <h4 class="text-xs font-bold text-white">In-Game Phone Number</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Active number so buyers can reach you directly.</p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-dot text-emerald-400 text-xs mt-1"></i>
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Organization / Group (Optional)</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Gang or guild affiliation for profile badge.</p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-dot text-emerald-400 text-xs mt-1"></i>
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Item Catalog &amp; Prices</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">List of firearms, ammo, gear, or services with prices.</p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
-                    <i class="fa-solid fa-circle-dot text-emerald-400 text-xs mt-1"></i>
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Shop Notes &amp; Specialty Tagline</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Short description (e.g. bulk sales, 24/7 delivery).</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Frequently Asked Questions (FAQ) -->
         <section class="space-y-6">
@@ -670,28 +593,6 @@
             </div>
         </section>
 
-        <!-- Direct Contact Samuel Soup CTA Banner -->
-        <section class="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/30 rounded-3xl p-6 sm:p-10 relative overflow-hidden text-center space-y-6 glow-emerald">
-            <div class="max-w-2xl mx-auto space-y-3 relative z-10">
-                <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-400 text-2xl mx-auto shadow-lg shadow-emerald-500/20">
-                    <i class="fa-solid fa-address-card"></i>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-white">Ready to List Your Shop?</h2>
-                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    Contact <strong>Samuel Soup</strong> directly to submit your shop information, finalize your service package, and arrange payment in Paralake.
-                </p>
-                <div class="pt-2 flex flex-wrap items-center justify-center gap-4">
-                    <a href="https://crunchycodes.github.io/PTN-Application/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm px-6 py-3 rounded-xl shadow-xl shadow-emerald-500/30 hover:scale-105 transition-all duration-200">
-                        <i class="fa-solid fa-paper-plane text-sm"></i>
-                        <span>Fill Out PTN Sign-Up Application</span>
-                    </a>
-                    <a href="https://crunchycodes.github.io/ParalakeTradingNetwork/Samuels-Shop/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm px-6 py-3 rounded-xl border border-slate-700 transition-all">
-                        <i class="fa-solid fa-user-gear text-emerald-400"></i>
-                        <span>Samuel Soup Shop Profile</span>
-                    </a>
-                </div>
-            </div>
-        </section>
 
     </main>
 
@@ -711,10 +612,8 @@
                 const baseSetup = document.getElementById('baseSetup');
 
                 const chkFeatured = document.getElementById('chkFeatured');
-                const featuredWeeks = parseInt(document.getElementById('featuredWeeks').value) || 1;
 
                 const chkUpdate = document.getElementById('chkUpdate');
-                const updateCount = parseInt(document.getElementById('updateCount').value) || 1;
 
                 const chkExpedited = document.getElementById('chkExpedited');
 
@@ -723,10 +622,6 @@
 
                 const custCharName = (custCharNameInput && custCharNameInput.value.trim()) ? custCharNameInput.value.trim() : '[Your Name]';
                 const custShopName = (custShopNameInput && custShopNameInput.value.trim()) ? custShopNameInput.value.trim() : '[Your Shop Name]';
-
-                // Toggle select enable/disable states
-                document.getElementById('featuredWeeks').disabled = !chkFeatured.checked;
-                document.getElementById('updateCount').disabled = !chkUpdate.checked;
 
                 // Highlight selected base service labels visually
                 const lblListing = document.getElementById('lbl-listing');
@@ -756,15 +651,15 @@
                 }
 
                 if (chkFeatured && chkFeatured.checked) {
-                    const featCost = 25000 * featuredWeeks;
+                    const featCost = 25000;
                     total += featCost;
-                    itemsList.push(`• Featured Shop Spotlight (${featuredWeeks} wk${featuredWeeks > 1 ? 's' : ''}): $${featCost.toLocaleString()}`);
+                    itemsList.push(`• Featured Shop Spotlight (7 days): $${featCost.toLocaleString()}`);
                 }
 
                 if (chkUpdate && chkUpdate.checked) {
-                    const updCost = 5000 * updateCount;
+                    const updCost = 5000;
                     total += updCost;
-                    itemsList.push(`• Future Profile Refresh (${updateCount}x): $${updCost.toLocaleString()}`);
+                    itemsList.push(`• Future Profile Refresh (1x): $${updCost.toLocaleString()}`);
                 }
 
                 if (chkExpedited && chkExpedited.checked) {
