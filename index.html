@@ -1,32 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paralake Trading Network | Shop Directory</title>
+    <title>Paralake Trading Network</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            950: '#052e16',
-                        },
-                        darkbg: '#090d16',
-                        cardbg: '#111827',
-                        bordercolor: '#1f2937'
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        }
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -35,46 +28,78 @@
             }
         }
     </script>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #090d16; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #090d16; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #374151; }
-        .glow-emerald { box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.15); }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f1f5f9;
+        }
+        .glow-emerald {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.2);
+        }
+        .glow-emerald-hover:hover {
+            box-shadow: 0 0 30px 0px rgba(16, 185, 129, 0.35);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
     </style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="min-h-full flex flex-col bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-slate-950">
 
-    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xl shadow-inner">
-                    <i class="fa-solid fa-network-wired"></i>
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200">
+                    <i class="fa-solid fa-store text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg text-white tracking-tight flex items-center gap-2">
-                        Paralake Trading Network
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono px-2 py-0.5 rounded-full uppercase tracking-wider">Directory</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Discover & shop from community merchants</p>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+                            Paralake Trading Network
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium">Independent Merchant Directory</p>
                 </div>
-            </div>
+            </a>
 
             <div class="flex items-center gap-3">
-                <button onclick="toggleAddFolderModal(true)" class="hidden sm:flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-                    <i class="fa-solid fa-folder-plus text-emerald-400"></i>
-                    <span>Add Subfolder</span>
-                </button>
-                <button onclick="discoverShops()" class="p-2.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition" title="Refresh Directory">
-                    <i class="fa-solid fa-rotate" id="refreshIcon"></i>
+                <a href="https://github.com/crunchycodes/ParalakeTradingNetwork" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-700 transition-all">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span>GitHub Repo</span>
+                </a>
+                <button id="btnRefresh" onclick="loadAllShops()" class="inline-flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold px-3.5 py-2 rounded-xl border border-emerald-500/30 transition-all">
+                    <i class="fa-solid fa-arrows-rotate text-xs" id="refreshIcon"></i>
+                    <span>Refresh Shops</span>
                 </button>
             </div>
         </div>
     </header>
 
+    <!-- Main Content Area -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
+        <!-- Hero Welcome Section -->
         <section class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl glow-emerald">
             <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute right-40 -top-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -82,7 +107,7 @@
             <div class="relative z-10 max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2 bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Live Repository Index
+                    Live Network Directory
                 </div>
 
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
@@ -90,410 +115,354 @@
                 </h2>
 
                 <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-                    This directory automatically scans subfolders in <code class="text-emerald-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800 font-mono text-xs">crunchycodes/ParalakeTradingNetwork</code> to generate real-time profile previews and direct shopping links.
+                    Get directly in touch with local sellers and crafters. Deal directly with merchants across the city—no middleman, zero platform cut, and <strong>no 3rd parties taking their share of your profits</strong>.
                 </p>
 
                 <!-- Stats Cards -->
-                <div class="pt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-3.5">
+                <div class="pt-4 flex gap-4">
+                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-3.5 min-w-[200px]">
                         <span class="text-xs text-slate-400 block font-medium">Total Shops Discovered</span>
                         <span id="statShopsCount" class="text-2xl font-black font-mono text-emerald-400">0</span>
-                    </div>
-                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-3.5">
-                        <span class="text-xs text-slate-400 block font-medium">Repository Base</span>
-                        <span class="text-xs font-mono text-slate-200 block truncate mt-1.5" title="crunchycodes.github.io/ParalakeTradingNetwork">
-                            ParalakeTradingNetwork
-                        </span>
-                    </div>
-                    <div class="col-span-2 sm:col-span-1 bg-slate-950/60 border border-slate-800/80 rounded-2xl p-3.5 flex flex-col justify-center">
-                        <span class="text-xs text-slate-400 block font-medium">Network Status</span>
-                        <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 mt-1">
-                            <i class="fa-solid fa-circle text-[8px] text-emerald-400"></i> Active & Online
-                        </span>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Search and Filter Bar -->
         <section class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
-            <!-- Search Bar -->
             <div class="relative w-full md:w-96">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput" oninput="filterDirectory()" placeholder="Search by shop name, owner, or folder..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+                <input type="text" id="searchInput" onkeyup="filterShops()" placeholder="Search by shop, owner, organization..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/80 focus:ring-1 focus:ring-emerald-500 transition-all">
             </div>
 
-            <!-- Sort & View Controls -->
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end text-xs">
-                <span class="text-slate-400 font-medium">Sort By:</span>
-                <select id="sortSelect" onchange="filterDirectory()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 transition">
-                    <option value="name-asc">Shop Name (A-Z)</option>
-                    <option value="folder-asc">Subfolder Name (A-Z)</option>
-                    <option value="owner-asc">Owner Name (A-Z)</option>
-                </select>
-                <button onclick="toggleAddFolderModal(true)" class="sm:hidden bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-xl text-xs font-semibold border border-slate-700">
-                    <i class="fa-solid fa-folder-plus text-emerald-400 me-1"></i> Add
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                <span id="resultsCounter" class="text-xs font-medium text-slate-400">Loading shops...</span>
+                <button onclick="toggleAddFolderModal()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl border border-slate-700 transition-all">
+                    <i class="fa-solid fa-plus text-emerald-400"></i>
+                    <span>Add Manual Subfolder</span>
                 </button>
             </div>
         </section>
 
+        <!-- Shops Directory Container Grid -->
         <section>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-xl text-white flex items-center gap-2">
-                    <i class="fa-solid fa-store text-emerald-400"></i> Registered Merchant Outlets
-                </h3>
-                <span id="filteredCountBadge" class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full font-mono">
-                    Showing 0 Shops
-                </span>
-            </div>
-
-            <!-- Shop Cards Grid Container -->
             <div id="shopsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Dynamically populated cards -->
+                <!-- Dynamic shop cards will be injected here -->
             </div>
 
-            <!-- Empty / Loading State Placeholder -->
-            <div id="statusState" class="py-16 text-center bg-slate-900/40 border border-slate-800 rounded-3xl p-8">
-                <div id="loadingSpinner" class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500/20 border-t-emerald-500 mb-4"></div>
-                <h4 id="statusTitle" class="text-slate-200 font-bold text-lg mb-1">Scanning Repository Subfolders...</h4>
-                <p id="statusDesc" class="text-slate-400 text-sm max-w-md mx-auto">
-                    Fetching directory list from <code class="text-emerald-400 font-mono">github.com/crunchycodes/ParalakeTradingNetwork</code>...
-                </p>
+            <!-- Loading State Spinner -->
+            <div id="loadingState" class="py-16 text-center space-y-4">
+                <div class="inline-block w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin"></div>
+                <p class="text-slate-400 text-sm">Scanning subfolders for merchant profiles...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden py-16 text-center space-y-4 bg-slate-900/40 rounded-2xl border border-slate-800/80">
+                <div class="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center text-slate-500 mx-auto text-2xl">
+                    <i class="fa-solid fa-store-slash"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-slate-200 font-semibold text-lg">No Shops Found</h3>
+                    <p class="text-slate-400 text-sm max-w-md mx-auto">Try clearing your search query or manual subfolder inputs.</p>
+                </div>
             </div>
         </section>
 
     </main>
 
-    <div id="addFolderModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-lg text-white flex items-center gap-2">
-                    <i class="fa-solid fa-folder-plus text-emerald-400"></i> Add Custom Subfolder
+    <!-- Manual Subfolder Modal -->
+    <div id="addFolderModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-emerald-400"></i>
+                    Add Subfolder Manually
                 </h3>
-                <button onclick="toggleAddFolderModal(false)" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button onclick="toggleAddFolderModal()" class="text-slate-400 hover:text-slate-200 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <p class="text-xs text-slate-400">
-                If GitHub API rate limits occur or you have a new subfolder in local dev, enter the folder name (e.g. <code class="text-emerald-400">Sams-Shop</code>).
+                Enter a subfolder name from the repository (e.g., <code class="text-emerald-400">Samuels-Shop</code>) to manually fetch its profile.
             </p>
-
             <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Subfolder Path Name</label>
-                <input type="text" id="manualFolderInput" placeholder="e.g. Sams-Shop" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Subfolder Directory Name</label>
+                <input type="text" id="manualFolderName" placeholder="e.g. Samuels-Shop" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500">
             </div>
-
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="toggleAddFolderModal(false)" class="px-4 py-2 text-xs font-semibold bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700">Cancel</button>
-                <button onclick="handleAddFolderSubmit()" class="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl">Add & Load</button>
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="toggleAddFolderModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">Cancel</button>
+                <button onclick="addManualFolder()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/20">Add &amp; Load</button>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-800/80 py-8 text-center text-xs text-slate-500 mt-16">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-bold">
-                    <i class="fa-solid fa-network-wired"></i>
-                </div>
-                <span class="text-slate-400 font-semibold">Paralake Trading Network</span>
-            </div>
-            <p>
-                Hosted on GitHub Pages &bull; <a href="https://github.com/crunchycodes/ParalakeTradingNetwork" target="_blank" class="text-emerald-400 hover:underline font-mono">crunchycodes/ParalakeTradingNetwork</a>
-            </p>
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
+            <p>Paralake Trading Network &copy; 2026. Built for community roleplay commerce.</p>
+            <p class="text-[11px] text-slate-600">All shop pages are hosted independently via GitHub subfolders.</p>
         </div>
     </footer>
 
     <script>
-        // Global State
-        const REPO_NAME = "crunchycodes/ParalakeTradingNetwork";
-        const BASE_URL = "https://crunchycodes.github.io/ParalakeTradingNetwork";
+        // Configuration
+        const REPO_OWNER = 'crunchycodes';
+        const REPO_NAME = 'ParalakeTradingNetwork';
+        const REPO_BASE_URL = `https://crunchycodes.github.io/${REPO_NAME}`;
+        const GITHUB_REPO_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
         
-        let discoveredShops = []; // Array of shop object entries
-        let savedFolders = [];    // Custom folders stored in LocalStorage
+        // Default list of known shop subfolders used ONLY as a fallback if API query fails
+        const KNOWN_FOLDERS = ['Samuels-Shop', 'Sams-Shop'];
+        
+        let activeShopsData = [];
 
-        // Known default fallback folders if API fails or offline
-        const DEFAULT_KNOWN_FOLDERS = ["Samuels-Shop", "Sams-Shop"];
+        // Initialize application on load
+        window.onload = function() {
+            loadAllShops();
+        };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadSavedFolders();
-            discoverShops();
-        });
-
-        function loadSavedFolders() {
-            try {
-                const stored = localStorage.getItem('ptn_custom_folders');
-                if (stored) {
-                    savedFolders = JSON.parse(stored);
-                }
-            } catch (e) {
-                savedFolders = [];
-            }
-        }
-
-        function saveFoldersToStorage() {
-            try {
-                localStorage.setItem('ptn_custom_folders', JSON.stringify(savedFolders));
-            } catch (e) {}
-        }
-
-        async function discoverShops() {
-            showLoadingState("Scanning Repository Subfolders...", "Fetching directory contents from GitHub API...");
-            discoveredShops = [];
+        // Main function to discover subfolders and fetch shop profiles
+        async function loadAllShops() {
+            const loadingState = document.getElementById('loadingState');
+            const shopsGrid = document.getElementById('shopsGrid');
+            const emptyState = document.getElementById('emptyState');
             const refreshIcon = document.getElementById('refreshIcon');
-            if (refreshIcon) refreshIcon.classList.add('fa-spin');
 
-            let folderList = [];
+            refreshIcon.classList.add('animate-spin');
+            loadingState.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            shopsGrid.innerHTML = '';
+            activeShopsData = [];
 
+            let subfolders = new Set();
+
+            // 1. Query GitHub Contents API to dynamically find subfolders
             try {
-                // Query GitHub REST API for contents
-                const response = await fetch(`https://api.github.io/repos/${REPO_NAME}/contents/`, { cache: 'no-store' });
-                
-                if (response.ok) {
-                    const contents = await response.json();
-                    // Filter for directories that don't start with '.'
-                    folderList = contents
-                        .filter(item => item.type === 'dir' && !item.name.startsWith('.') && item.name.toLowerCase() !== 'assets')
-                        .map(item => item.name);
-                } else {
-                    console.warn("GitHub API responded with status:", response.status);
-                    folderList = [...DEFAULT_KNOWN_FOLDERS];
+                const apiResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`);
+                if (apiResponse.ok) {
+                    const contents = await apiResponse.json();
+                    if (Array.isArray(contents)) {
+                        contents.forEach(item => {
+                            if (item.type === 'dir' && !item.name.startsWith('.')) {
+                                subfolders.add(item.name);
+                            }
+                        });
+                    }
                 }
             } catch (err) {
-                console.warn("Could not query GitHub API directly:", err);
-                folderList = [...DEFAULT_KNOWN_FOLDERS];
+                console.warn('GitHub API query limited or failed. Using fallback folder list.', err);
             }
 
-            // Combine API folders with manually saved custom folders
-            const mergedFolders = Array.from(new Set([...folderList, ...savedFolders, ...DEFAULT_KNOWN_FOLDERS]));
-
-            const shopPromises = mergedFolders.map(folderName => fetchShopProfile(folderName));
-            const results = await Promise.allSettled(shopPromises);
-
-            results.forEach((res, index) => {
-                if (res.status === 'fulfilled' && res.value) {
-                    discoveredShops.push(res.value);
-                }
-            });
-
-            if (refreshIcon) refreshIcon.classList.remove('fa-spin');
-
-            document.getElementById('statShopsCount').innerText = discoveredShops.length;
-
-            if (discoveredShops.length === 0) {
-                showEmptyState("No Shops Found", "No valid shop profiles could be fetched. Try adding a custom subfolder name.");
-            } else {
-                hideStatusState();
-                filterDirectory();
+            // Only use fallback folders if the GitHub API returned no directories
+            if (subfolders.size === 0) {
+                KNOWN_FOLDERS.forEach(folder => subfolders.add(folder));
             }
+
+            // 2. Fetch perpheads-shop-profile.json for each folder
+            const folderList = Array.from(subfolders);
+            const shopPromises = folderList.map(folder => fetchShopProfile(folder));
+            
+            const results = await Promise.all(shopPromises);
+            activeShopsData = results.filter(shop => shop !== null);
+
+            loadingState.classList.add('hidden');
+            refreshIcon.classList.remove('animate-spin');
+
+            // Render shop cards
+            renderShopCards(activeShopsData);
         }
 
-        // Fetch perpheads-shop-profile.json for a single folder
+        // Fetch JSON with fallback logic
         async function fetchShopProfile(folderName) {
-            // Clean folder path
-            const cleanFolder = folderName.replace(/^\/+|\/+$/g, '');
-            
-            // Try relative URL first, then GitHub Pages, then direct Raw GitHub Repo content
-            const jsonRelativeUrl = `./${cleanFolder}/perpheads-shop-profile.json`;
-            const jsonAbsoluteUrl = `${BASE_URL}/${cleanFolder}/perpheads-shop-profile.json`;
-            const jsonRawUrl = `https://raw.githubusercontent.com/${REPO_NAME}/main/${cleanFolder}/perpheads-shop-profile.json`;
+            // Priority sequence of JSON sources
+            const fetchUrls = [
+                `./${folderName}/perpheads-shop-profile.json`,
+                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${folderName}/perpheads-shop-profile.json`,
+                `${REPO_BASE_URL}/${folderName}/perpheads-shop-profile.json`
+            ];
 
             let profileData = null;
 
-            try {
-                let resp = await fetch(jsonRelativeUrl, { cache: 'no-store' });
-                if (!resp.ok) {
-                    resp = await fetch(jsonAbsoluteUrl, { cache: 'no-store' });
+            for (const url of fetchUrls) {
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (res.ok) {
+                        profileData = await res.json();
+                        break;
+                    }
+                } catch (e) {
+                    // Try next source fallback
                 }
-                if (!resp.ok) {
-                    resp = await fetch(jsonRawUrl, { cache: 'no-store' });
-                }
-                if (resp.ok) {
-                    const data = await resp.json();
-                    profileData = data;
-                }
-            } catch (e) {
-                console.warn(`Could not fetch profile JSON for ${cleanFolder}`);
             }
 
-            // Calculate priced items count
-            let pricedItemsCount = 0;
-            if (profileData && Array.isArray(profileData.items)) {
-                pricedItemsCount = profileData.items.filter(i => i.sellPrice !== null && i.sellPrice !== undefined && Number(i.sellPrice) > 0).length;
-            }
-
+            // Fallback object if profile JSON is missing or unformatted
             return {
-                folderName: cleanFolder,
-                shopLink: `${BASE_URL}/${cleanFolder}/`,
-                githubLink: `https://github.com/${REPO_NAME}/tree/main/${cleanFolder}`,
-                profile: profileData ? profileData.profile || {} : {},
-                pricedItemsCount: pricedItemsCount,
-                hasData: !!profileData
+                folderName: folderName,
+                shopUrl: `${REPO_BASE_URL}/${folderName}`,
+                githubUrl: `${GITHUB_REPO_URL}/tree/main/${folderName}`,
+                profile: profileData || {
+                    characterName: folderName.replace(/-/g, ' '),
+                    shopName: `${folderName.replace(/-/g, ' ')}'s Store`,
+                    contactPhone: 'N/A',
+                    organizationName: 'Independent',
+                    shopNotes: 'Welcome to our shop directory entry.'
+                }
             };
         }
 
-        function filterDirectory() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            const sortVal = document.getElementById('sortSelect').value;
+        function renderShopCards(shops) {
+            const shopsGrid = document.getElementById('shopsGrid');
+            const emptyState = document.getElementById('emptyState');
+            const statShopsCount = document.getElementById('statShopsCount');
+            const resultsCounter = document.getElementById('resultsCounter');
 
-            let filtered = discoveredShops.filter(shop => {
-                const name = (shop.profile.shopName || shop.folderName).toLowerCase();
-                const owner = (shop.profile.characterName || '').toLowerCase();
-                const folder = shop.folderName.toLowerCase();
-                const org = (shop.profile.organizationName || '').toLowerCase();
-
-                return !query || name.includes(query) || owner.includes(query) || folder.includes(query) || org.includes(query);
-            });
-
-            // Sort
-            filtered.sort((a, b) => {
-                const nameA = (a.profile.shopName || a.folderName).toLowerCase();
-                const nameB = (b.profile.shopName || b.folderName).toLowerCase();
-                const ownerA = (a.profile.characterName || '').toLowerCase();
-                const ownerB = (b.profile.characterName || '').toLowerCase();
-
-                if (sortVal === 'name-asc') return nameA.localeCompare(nameB);
-                if (sortVal === 'folder-asc') return a.folderName.localeCompare(b.folderName);
-                if (sortVal === 'owner-asc') return ownerA.localeCompare(ownerB);
-                return 0;
-            });
-
-            renderGrid(filtered);
-        }
-
-        function renderGrid(shops) {
-            const grid = document.getElementById('shopsGrid');
-            const badge = document.getElementById('filteredCountBadge');
-            
-            badge.innerText = `Showing ${shops.length} Shop${shops.length === 1 ? '' : 's'}`;
-            grid.innerHTML = '';
+            shopsGrid.innerHTML = '';
+            statShopsCount.innerText = shops.length;
+            resultsCounter.innerText = `Showing ${shops.length} shop${shops.length === 1 ? '' : 's'}`;
 
             if (shops.length === 0) {
-                showEmptyState("No Matching Shops", "Try adjusting your search query or add a subfolder manually.");
+                emptyState.classList.remove('hidden');
                 return;
             }
 
-            hideStatusState();
+            emptyState.classList.add('hidden');
 
-            shops.forEach(shop => {
-                const p = shop.profile;
-                const shopTitle = p.shopName || formatFolderName(shop.folderName);
-                const ownerName = p.characterName || 'Unknown Merchant';
-                const avatar = p.profileImage || `https://placehold.co/120x120/1e293b/64748b?text=${encodeURIComponent(shopTitle.charAt(0))}`;
-                const orgImage = p.organizationImage;
-                const desc = p.description || 'Visit this shop to explore their full inventory and pricing.';
+            shops.forEach(shopData => {
+                const folder = shopData.folderName;
+                const profile = shopData.profile;
+                const shopPageUrl = `${REPO_BASE_URL}/${folder}`;
+                const githubDirUrl = `${GITHUB_REPO_URL}/tree/main/${folder}`;
 
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-6 flex flex-col justify-between transition duration-300 shadow-xl hover:shadow-emerald-950/20 group relative overflow-hidden";
+                // Calculate priced items count if items exist
+                let pricedItemsCount = 0;
+                if (profile.inventory && Array.isArray(profile.inventory)) {
+                    pricedItemsCount = profile.inventory.filter(i => i.sellPrice !== null && i.sellPrice !== undefined).length;
+                }
 
-                card.innerHTML = `
-                    <div class="space-y-4">
-                        <!-- Card Header & Folder Badge -->
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex items-center gap-3">
-                                <div class="relative flex-shrink-0">
-                                    <img src="${escapeHtml(avatar)}" alt="${escapeHtml(shopTitle)}" class="w-14 h-14 rounded-2xl object-cover border-2 border-slate-800 group-hover:border-emerald-500/50 bg-slate-950 transition" onerror="this.src='https://placehold.co/120x120/1e293b/64748b?text=Shop'">
-                                    ${orgImage ? `<img src="${escapeHtml(orgImage)}" title="${escapeHtml(p.organizationName || 'Organization')}" class="w-6 h-6 rounded-full border-2 border-slate-900 bg-slate-800 object-cover absolute -bottom-1 -right-1 shadow">` : ''}
+                const cardHtml = `
+                    <article class="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 flex flex-col justify-between space-y-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/40 glow-emerald-hover group">
+                        
+                        <!-- Header / Info -->
+                        <div class="space-y-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center text-emerald-400 text-xl overflow-hidden font-bold">
+                                        ${profile.profileImage 
+                                            ? `<img src="${profile.profileImage}" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-store\'></i>';">`
+                                            : `<i class="fa-solid fa-store"></i>`
+                                        }
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg text-white group-hover:text-emerald-400 transition-colors leading-snug">
+                                            ${escapeHtml(profile.shopName || folder)}
+                                        </h3>
+                                        <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
+                                            <i class="fa-solid fa-user text-slate-500 text-[10px]"></i>
+                                            <span>${escapeHtml(profile.characterName || 'Unknown Owner')}</span>
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="min-w-0">
-                                    <h4 class="font-extrabold text-white text-lg group-hover:text-emerald-400 transition truncate leading-snug">
-                                        ${escapeHtml(shopTitle)}
-                                    </h4>
-                                    <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 truncate">
-                                        <i class="fa-solid fa-user-tag text-emerald-400 text-[10px]"></i> ${escapeHtml(ownerName)}
-                        <!-- Subfolder URL Tag & GitHub Source Link -->
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800/80 px-2.5 py-1 rounded-lg text-[11px] font-mono text-emerald-400/90 truncate flex-grow">
-                                <i class="fa-regular fa-folder text-slate-500"></i>
-                                <span class="truncate">/${escapeHtml(shop.folderName)}</span>
                             </div>
-                            <a href="${escapeHtml(shop.githubLink)}" target="_blank" rel="noopener noreferrer" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 p-1.5 rounded-lg text-[11px] text-slate-400 hover:text-white transition flex-shrink-0" title="View Folder on GitHub">
-                                <i class="fa-brands fa-github"></i>
+
+                            <!-- Badges Grid -->
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5">
+                                    <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Phone</span>
+                                    <span class="font-mono text-emerald-400 font-semibold truncate block mt-0.5">
+                                        ${escapeHtml(profile.contactPhone || 'N/A')}
+                                    </span>
+                                </div>
+                                <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5">
+                                    <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Priced Items</span>
+                                    <span class="font-mono text-slate-200 font-semibold truncate block mt-0.5">
+                                        ${pricedItemsCount} Available
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Organization Tag -->
+                            ${profile.organizationName ? `
+                                <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-lg">
+                                    <i class="fa-solid fa-users text-emerald-500 text-[11px]"></i>
+                                    <span class="font-medium truncate max-w-[200px]">${escapeHtml(profile.organizationName)}</span>
+                                </div>
+                            ` : ''}
+
+                            <!-- Notes Preview -->
+                            <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed italic bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/50">
+                                "${escapeHtml(profile.shopNotes || 'No notes provided by merchant.')}"
+                            </p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pt-2 border-t border-slate-800/80 flex items-center gap-2">
+                            <a href="${shopPageUrl}" class="flex-grow inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all">
+                                <span>Visit Shop Page</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                            <a href="${githubDirUrl}" target="_blank" rel="noopener" title="View subfolder on GitHub" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl border border-slate-700 transition-colors">
+                                <i class="fa-brands fa-github text-sm"></i>
                             </a>
                         </div>
 
-                        <!-- Description Preview -->
-                        <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed italic">
-                            "${escapeHtml(desc)}"
-                        </p>
-
-                        <!-- Quick Badges Grid -->
-                        <div class="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-slate-800/80">
-                            <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800/50 flex items-center gap-2">
-                                <i class="fa-solid fa-phone text-emerald-400"></i>
-                                <span class="font-mono text-slate-300 truncate">${escapeHtml(p.phoneNumber || 'N/A')}</span>
-                            </div>
-                            <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800/50 flex items-center gap-2">
-                                <i class="fa-solid fa-boxes-stacked text-teal-400"></i>
-                                <span class="text-slate-300 font-medium truncate">${shop.pricedItemsCount} Items Priced</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Visit Shop Link Button -->
-                    <div class="mt-6 pt-4 border-t border-slate-800/80">
-                        <a href="${escapeHtml(shop.shopLink)}" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 transition active:scale-95 group-hover:bg-emerald-500">
-                            <span>Visit ${escapeHtml(shopTitle)}</span>
-                            <i class="fa-solid fa-arrow-right text-xs transition group-hover:translate-x-1"></i>
-                        </a>
-                    </div>
+                    </article>
                 `;
-
-                grid.appendChild(card);
+                shopsGrid.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
 
-        function showLoadingState(title, desc) {
-            const status = document.getElementById('statusState');
-            const spinner = document.getElementById('loadingSpinner');
-            document.getElementById('statusTitle').innerText = title;
-            document.getElementById('statusDesc').innerText = desc;
-            spinner.classList.remove('hidden');
-            status.classList.remove('hidden');
-            document.getElementById('shopsGrid').innerHTML = '';
+        function filterShops() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                renderShopCards(activeShopsData);
+                return;
+            }
+
+            const filtered = activeShopsData.filter(shop => {
+                const folder = shop.folderName.toLowerCase();
+                const charName = (shop.profile.characterName || '').toLowerCase();
+                const shopName = (shop.profile.shopName || '').toLowerCase();
+                const org = (shop.profile.organizationName || '').toLowerCase();
+
+                return folder.includes(query) || charName.includes(query) || shopName.includes(query) || org.includes(query);
+            });
+
+            renderShopCards(filtered);
         }
 
-        function showEmptyState(title, desc) {
-            const status = document.getElementById('statusState');
-            const spinner = document.getElementById('loadingSpinner');
-            document.getElementById('statusTitle').innerText = title;
-            document.getElementById('statusDesc').innerText = desc;
-            spinner.classList.add('hidden');
-            status.classList.remove('hidden');
-        }
+        // Add manual folder dynamically
+        function addManualFolder() {
+            const input = document.getElementById('manualFolderName');
+            const folderName = input.value.trim();
 
-        function hideStatusState() {
-            document.getElementById('statusState').classList.add('hidden');
-        }
+            if (!folderName) return;
 
-        function toggleAddFolderModal(show) {
-            const modal = document.getElementById('addFolderModal');
-            if (show) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
-        }
-
-        function handleAddFolderSubmit() {
-            const input = document.getElementById('manualFolderInput');
-            const val = input.value.trim();
-            if (!val) return;
-
-            if (!savedFolders.includes(val)) {
-                savedFolders.push(val);
-                saveFoldersToStorage();
+            // Check if already loaded
+            if (!activeShopsData.some(s => s.folderName.toLowerCase() === folderName.toLowerCase())) {
+                fetchShopProfile(folderName).then(newShop => {
+                    activeShopsData.push(newShop);
+                    renderShopCards(activeShopsData);
+                });
             }
 
             input.value = '';
-            toggleAddFolderModal(false);
-            discoverShops();
+            toggleAddFolderModal();
         }
 
-        function formatFolderName(name) {
-            return name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        function toggleAddFolderModal() {
+            const modal = document.getElementById('addFolderModal');
+            modal.classList.toggle('hidden');
         }
 
+        // Helper to sanitize text strings
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
     </script>
 </body>
