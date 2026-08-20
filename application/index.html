@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perpheads Crafting Shop Builder</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #111;
+      color: #e6e6e6;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 1rem; }
+    header { max-width: 1180px; margin: 0 auto 1.5rem; }
+    h1 { margin: 0 0 0.25rem; font-size: clamp(2rem, 3vw, 2.8rem); }
+    p.lead { margin: 0; color: #a8a8a8; }
+    .panel { background: #151515; border: 1px solid #272727; border-radius: 18px; padding: 1.25rem; margin-bottom: 1.25rem; }
+    .panel + .panel { margin-top: 1rem; }
+    .grid { display: grid; gap: 1rem; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    label { display: block; font-size: 0.95rem; margin-bottom: 0.35rem; color: #c1c1c1; }
+    input[type="text"], input[type="url"], input[type="number"], textarea, select { width: 100%; border: 1px solid #333; border-radius: 12px; background: #0f0f0f; color: #f1f1f1; padding: 0.9rem 0.95rem; font-size: 1rem; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid #5b7bff; outline-offset: 2px; }
+    .small { font-size: 0.9rem; color: #8f8f8f; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    button { border: none; cursor: pointer; border-radius: 12px; padding: 0.95rem 1.25rem; font-weight: 600; background: #4c6cff; color: white; transition: transform 0.16s ease, background 0.16s ease; }
+    button:hover { transform: translateY(-1px); background: #3d5de1; }
+    button.secondary { background: #272727; color: #e0e0e0; }
+    button.secondary:hover { background: #343434; }
+    .notice { margin-top: 0.75rem; color: #a6a6a6; }
+    .status { margin-top: 0.25rem; font-size: 0.95rem; }
+    .status span { font-weight: 700; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { padding: 0.9rem 0.85rem; text-align: left; border-bottom: 1px solid #222; }
+    th { color: #b8b8b8; font-weight: 600; font-size: 0.95rem; }
+    td { vertical-align: top; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .small-table { font-size: 0.93rem; color: #b1b1b1; }
+    .tag { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(100, 131, 255, 0.15); color: #ccdaff; border-radius: 999px; padding: 0.25rem 0.65rem; font-size: 0.85rem; }
+    textarea { resize: vertical; min-height: 10rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+    .footer { margin-top: 1rem; font-size: 0.92rem; color: #7d7d7d; }
+    @media (max-width: 720px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      table { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Paralake Shop & Profile Builder</h1>
+    <p class="lead">Create a trading profile, set your own sell prices for craft items, and export a JSON package for use in the PTN.</p>
+  </header>
+
+  <section class="panel">
+    <h2>1. Profile Information</h2>
+    <div class="grid grid-2">
+      <label>
+        Character Name <span class="small">(required)</span>
+        <input id="characterName" type="text" placeholder="Your character name" required />
+      </label>
+      <label>
+        Shop Name <span class="small">(optional)</span>
+        <input id="shopName" type="text" placeholder="Your shop name (displayed in export)" />
+      </label>
+      <label>
+        Steam Profile URL <span class="small">(optional)</span>
+        <input id="steamName" type="url" placeholder="https://steamcommunity.com/id/yourname" />
+      </label>
+      <label>
+        Discord Username <span class="small">(optional)</span>
+        <input id="discordName" type="text" placeholder="Discord username" />
+      </label>
+      <label>
+        In-Game Phone Number <span class="small">(required)</span>
+        <input id="inGamePhone" type="text" placeholder="Phone number (in-game)" required />
+      </label>
+      <label>
+        Bank Info <span class="small">(optional)</span>
+        <input id="bankInfo" type="text" placeholder="Bank account or payment info" />
+      </label>
+      <label>
+        Description <span class="small">(optional)</span>
+        <input id="profileDescription" type="text" placeholder="Short description for your shop/profile" />
+      </label>
+      <label>
+        Additional Services <span class="small">(optional)</span>
+        <input id="additionalServices" type="text" placeholder="Services offered (comma-separated)" />
+      </label>
+      <label>
+        Additional Shop Info <span class="small">(optional)</span>
+        <input id="additionalShopInfo" type="text" placeholder="Extra shop info" />
+      </label>
+      <label>
+        Organization Name <span class="small">(optional)</span>
+        <input id="organizationName" type="text" placeholder="Organization name" />
+      </label>
+      <label>
+        Profile Image URL <span class="small">(optional)</span>
+        <input id="profileImage" type="url" placeholder="https://example.com/avatar.png" />
+      </label>
+      <label>
+        Organization Image URL <span class="small">(optional)</span>
+        <input id="organizationImage" type="url" placeholder="https://example.com/org.png" />
+      </label>
+    </div>
+    <div class="notice">The export will include all entered profile values and your custom craft item prices.</div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <h2 style="margin:0;">2. Craft Item Pricing</h2>
+        <div class="small">Uses your local crafting backup first, with the live API as a fallback.</div>
+      </div>
+      <div class="actions" style="margin-top:0;">
+        <button id="refreshButton" class="secondary">Refresh item list</button>
+      </div>
+    </div>
+
+    <!-- Custom Item Creator Panel -->
+    <section class="panel" id="custom-item-panel" style="margin-top:1rem;">
+      <h2>Custom Item Creator</h2>
+      <div class="grid grid-2">
+        <label>
+          Item Name <span class="small">(required)</span>
+          <input id="ci-name" type="text" placeholder="Custom item name" />
+        </label>
+        <label>
+          Category <span class="small">(required)</span>
+          <select id="ci-category">
+            <option value="">-- Select category --</option>
+          </select>
+        </label>
+        <label>
+          Description <span class="small">(optional)</span>
+          <input id="ci-description" type="text" placeholder="Short description or special notes" />
+        </label>
+      </div>
+      <div class="actions" style="margin-top:0.75rem;">
+        <button id="ci-add-button">Add custom item</button>
+        <button id="ci-clear-button" class="secondary">Clear fields</button>
+      </div>
+      <div class="status small" id="ci-status" style="margin-top:0.5rem;">Create custom items to appear in the list for pricing and export.</div>
+    </section>
+    <div class="grid" style="margin-top:1rem;">
+      <label style="margin-bottom:0;">
+        Search items
+        <input id="itemSearch" type="text" placeholder="Search by item name, category, or shop" />
+      </label>
+    </div>
+
+    <div class="status" id="itemStatus">Loading items…</div>
+    <div class="table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Materials</th>
+            <th>Craft Cost</th>
+            <th>Loaded</th>
+            <th>Shops</th>
+            <th>Your Sell Price</th>
+          </tr>
+        </thead>
+        <tbody id="itemTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>3. Export & Use</h2>
+    <div class="actions">
+      <button id="exportButton">Generate export data</button>
+      <button id="copyButton" class="secondary">Copy JSON</button>
+      <button id="downloadButton" class="secondary">Download JSON</button>
+    </div>
+    <div class="status" id="exportStatus">Your export data will appear below after generation.</div>
+    <textarea id="exportOutput" readonly placeholder="Generated JSON will appear here..."></textarea>
+    <div class="footer">Use the JSON output in another app, or paste it into a shared document for your shop profile and price list.</div>
+  </section>
+
+  <script>
+    const apiUrl = 'https://api.perpheads.com/v2/data/crafting';
+    const localDataUrl = './craftingdata.json';
+    const seedItems = [
+      { id: '1', name: 'Radio', category: 'Furniture', cost: 1500, shops: ["Ching's Convenience Store", 'RagnaTech', 'Puffer Mart'] },
+      { id: '2', name: 'Canned Food', category: 'Supplies', cost: 240, shops: ['RagnaTech', 'Puffer Mart'] },
+      { id: '3', name: 'Metal Scrap', category: 'Materials', cost: 320, shops: ['Ching\'s Convenience Store', 'RagnaTech'] },
+      { id: '4', name: 'Battery', category: 'Electronics', cost: 850, shops: ['Puffer Mart', 'RagnaTech'] },
+      { id: '5', name: 'Water Bottle', category: 'Supplies', cost: 180, shops: ['Ching\'s Convenience Store', 'Puffer Mart'] }
+    ];
+    const profileInputs = {
+      characterName: document.getElementById('characterName'),
+      shopName: document.getElementById('shopName'),
+      steamName: document.getElementById('steamName'),
+      discordName: document.getElementById('discordName'),
+      inGamePhone: document.getElementById('inGamePhone'),
+      bankInfo: document.getElementById('bankInfo'),
+      profileDescription: document.getElementById('profileDescription'),
+      additionalServices: document.getElementById('additionalServices'),
+      additionalShopInfo: document.getElementById('additionalShopInfo'),
+      profileImage: document.getElementById('profileImage'),
+      organizationName: document.getElementById('organizationName'),
+      organizationImage: document.getElementById('organizationImage')
+    };
+    const itemSearchInput = document.getElementById('itemSearch');
+    const itemTableBody = document.getElementById('itemTableBody');
+    const itemStatus = document.getElementById('itemStatus');
+    const exportButton = document.getElementById('exportButton');
+    const copyButton = document.getElementById('copyButton');
+    const downloadButton = document.getElementById('downloadButton');
+    const exportOutput = document.getElementById('exportOutput');
+    const refreshButton = document.getElementById('refreshButton');
+    const exportStatus = document.getElementById('exportStatus');
+
+    // Custom Item Creator elements
+    const ciName = document.getElementById('ci-name');
+    const ciCategory = document.getElementById('ci-category');
+    const ciDescription = document.getElementById('ci-description');
+    const ciAddButton = document.getElementById('ci-add-button');
+    const ciClearButton = document.getElementById('ci-clear-button');
+    const ciStatus = document.getElementById('ci-status');
+
+    let items = [];
+    let customPrices = {};
+    let customItems = {};
+    // Keep the raw crafting dataset (id -> raw entry) so we can compute craft costs from Ingredients
+    let craftingDataRaw = {};
+    const craftCostCache = {};
+
+    const weaponTypes = {
+        "AK-101": "Assault Rifle", "AK-47": "Assault Rifle", "AK-74U": "Assault Rifle",
+        "Colt M16A4": "Assault Rifle", "Colt M4A1": "Assault Rifle", "Enfield L85A2": "Assault Rifle",
+        "FN SCAR-L": "Assault Rifle", "HK G36C": "Assault Rifle", "HK G3A3": "Assault Rifle",
+        "Nexter FAMAS G2": "Assault Rifle", "Sako M92S": "Assault Rifle", "Sig Sauer SG550": "Assault Rifle",
+        "Steyr AUG A3": "Assault Rifle", "M67 Fragmentation Grenade": "Explosive", "M68 Impact Grenade": "Explosive",
+        "M69 Practice Grenade": "Explosive", "M84 Stun Grenade": "Explosive", "Mk II Grenade": "Explosive",
+        "Beretta M9": "Pistol", "Colt M1911A1": "Pistol", "Glock 17": "Pistol", "Glock 18C": "Pistol",
+        "Glock 20": "Pistol", "HK HK45 CT": "Pistol", "HK USP40": "Pistol", "IMI Desert Eagle Mark XIX": "Pistol",
+        "Luger P.08": "Pistol", "Makarov PM": "Pistol", "OTs-33 Pernach": "Pistol", "Sig Sauer P226": "Pistol",
+        "Walther P99": "Pistol", "Walther PPK": "Pistol", "Colt Anaconda": "Revolver", "Colt Python": "Revolver",
+        "SW Model 19": "Revolver", "SW Model 29": "Revolver", "SW Model 500": "Revolver", "Taurus 605": "Revolver",
+        "Taurus Raging Bull": "Revolver", "Benelli M3 Super 90": "Shotgun", "Double Barreled Shotgun": "Shotgun",
+        "Franchi SPAS-12": "Shotgun", "Mossberg 590A1": "Shotgun", "Remington 870": "Shotgun",
+        "Sawed-Off Shotgun": "Shotgun", "Remington 870 Short": "Shotgun", "MP9": "Machine Gun",
+        "HK MP5/10": "Machine Gun", "HK MP5A4": "Machine Gun", "HK MP5K": "Machine Gun", "HK MP7": "Machine Gun", "HK UMP45": "Machine Gun",
+        "Uzi": "Machine Gun", "MAC-11": "Machine Gun", "AI AS50": "Sniper", "AI L115A3": "Sniper",
+        "Barrett M82": "Sniper", "KAC SR-25": "Sniper", "Remington M24": "Sniper", "Springfield M14": "Sniper"
+    };
+
+    const capacities = {
+        "Walther PPK": 7, "Makarov PM": 8, "Luger P.08": 8, "Beretta M9": 15,
+        "Glock 17": 17, "USP40": 13, "M1911A1": 7, "HK45 CT": 10, "P226": 13,
+        "Walther P99": 12, "Glock 20": 15, "Desert Eagle": 7, "OTs-33 Pernach": 18,
+        "Glock 18C": 19, "MAC-11": 32, "MP5K": 20, "MP5": 30, "UZI": 32,
+        "MP5/10": 30, "AK-74U": 30, "SG550": 30, "UMP45": 25, "Sako M92S": 30,
+        "G36C": 30, "AK-47": 30, "AK-101": 30, "SR-25": 10, "M14": 20, "G3A3": 20,
+        "L115A3": 5, "M82": 5, "AS50": 5, "MP9": 20, "MP7": 20,
+        "Remington M24": 5,
+        "Taurus 605": 5, "SW Model 500": 5,
+        "Colt Python": 6, "SW Model 19": 6, "SW Model 29": 6, "Colt Anaconda": 6, "Taurus Raging Bull": 6,
+        "Sawed-Off Shotgun": 2, "Double Barreled Shotgun": 2,
+        "Remington 870 Short": 6, "Remington 870": 6, "Mossberg 590A1": 9,
+        "Franchi SPAS-12": 8, "Benelli M3 Super 90": 8
+    };
+
+    const ammoBoxRounds = { 'buckshot': 20, 'pistol ammo': 30, 'rifle ammo': 60, 'sniper ammo': 10 };
+
+    function mapTypeToAmmoKey(type) {
+      if (!type) return null;
+      const t = type.toLowerCase();
+      if (t.includes('shotgun')) return 'buckshot';
+      if (t.includes('sniper')) return 'sniper ammo';
+      if (t.includes('assault') || t.includes('rifle')) return 'rifle ammo';
+      if (t.includes('pistol') || t.includes('revolver') || t.includes('sub-machine') || t.includes('machine')) return 'pistol ammo';
+      return null;
+    }
+
+    function findAmmoBoxItem(ammoKey = null) {
+      const lower = (name) => name && name.toLowerCase();
+      // if ammoKey provided, try to find a matching box first
+      if (ammoKey) {
+        const found = items.find(it => lower(it.name).includes(ammoKey));
+        if (found) return { item: found, rounds: ammoBoxRounds[ammoKey] };
+      }
+      // fallback: look for explicit keywords in order of preference
+      const preferred = ['rifle ammo', 'pistol ammo', 'sniper ammo', 'buckshot'];
+      for (const key of preferred) {
+        const f = items.find(it => lower(it.name).includes(key));
+        if (f) return { item: f, rounds: ammoBoxRounds[key] };
+      }
+      // last resort: any item whose category/name mentions 'ammo' or 'box'
+      const any = items.find(it => (lower(it.category||'').includes('ammo') || lower(it.name||'').includes('box') || lower(it.name||'').includes('ammo')));
+      if (any) {
+        // try to find which ammoKey it matches
+        for (const key of Object.keys(ammoBoxRounds)) if (lower(any.name).includes(key)) return { item: any, rounds: ammoBoxRounds[key] };
+        return { item: any, rounds: Object.values(ammoBoxRounds)[0] };
+      }
+      return null;
+    }
+
+    // Add loaded variant entries for weapon/magazine items.
+    // For each item in categories 'weaponry' or 'magazine(s)', create a duplicate
+    // with the name appended with ' (Loaded)' and an id like 'originalId.5'.
+    function addLoadedVariants(list) {
+      const extras = [];
+      for (const it of list) {
+        const cat = (it.category || '').toLowerCase();
+        if (cat === 'weaponry' || cat === 'magazines' || cat.includes('magazine')) {
+          // skip explosive-type weapons
+          const lname = (it.name || '').toLowerCase();
+          if (lname.includes('grenade') || lname.includes('cocktail') || lname.includes('explosives')) continue;
+          const loadedId = `${it.id}.5`;
+          // avoid duplicates
+          if (list.find(x => String(x.id) === String(loadedId))) continue;
+          if (extras.find(x => String(x.id) === String(loadedId))) continue;
+
+          // find associated magazines for weapons (magazines themselves won't have associated clips)
+          let magsMeta = [];
+          // Only attempt to find mags when this is a weapon (not a magazine entry)
+          if (!((it.name||'').toLowerCase().includes('magazine'))) {
+            const weaponName = it.name.trim();
+            // mags that explicitly reference this weapon inside parentheses
+            const linkedMags = list.filter(x => {
+              const mm = x.name.match(/\(([^)]+)\)/);
+              if (!mm) return false;
+              const inside = mm[1].trim().toLowerCase();
+              return inside === weaponName.toLowerCase() || weaponName.toLowerCase().includes(inside);
+            });
+            if (linkedMags.length > 0) {
+              // default count 1 per linked mag
+              magsMeta = linkedMags.map(m => ({ id: m.id, count: 1 }));
+            } else {
+              // fallback for assault rifles -> use STANAG magazines (use up to two)
+              const wt = weaponTypes[it.name] || weaponTypes[weaponName] || null;
+              if (wt === 'Assault Rifle') {
+                // prefer explicit 'stanag' mentions
+                const stanags = list.filter(x => (x.name||'').toLowerCase().includes('stanag') || (x.name||'').toLowerCase().includes('5.56') || (x.name||'').toLowerCase().includes('556'));
+                if (stanags.length >= 2) magsMeta = [{ id: stanags[0].id, count: 1 }, { id: stanags[1].id, count: 1 }];
+                else if (stanags.length === 1) magsMeta = [{ id: stanags[0].id, count: 2 }];
+                else {
+                  // try any 30-capacity magazines as last resort
+                  const cap30 = list.filter(x => x.name.match(/(\b30\b|30x|x30)/i));
+                  if (cap30.length >= 2) magsMeta = [{ id: cap30[0].id, count: 1 }, { id: cap30[1].id, count: 1 }];
+                  else if (cap30.length === 1) magsMeta = [{ id: cap30[0].id, count: 2 }];
+                }
+              }
+            }
+          }
+
+          extras.push({
+            id: loadedId,
+            name: `${it.name} (Loaded)`,
+            category: it.category,
+            cost: it.cost != null ? Number(it.cost) : null,
+            shops: it.shops || [],
+            _sourceId: it.id,
+            loadedMeta: { mags: magsMeta }
+          });
+        }
+      }
+      return list.concat(extras);
+    }
+
+    function computeCraftCostById(id, cache = craftCostCache, seen = new Set()) {
+      if (cache[id] != null) return cache[id];
+      if (seen.has(id)) return 0; // avoid cycles
+      seen.add(id);
+
+      const raw = craftingDataRaw[id];
+      // fallback to items array entry if raw data missing
+      if (!raw) {
+        const it = items.find(x => String(x.id) === String(id));
+        const val = it && it.cost != null ? Number(it.cost) : 0;
+        cache[id] = val;
+        seen.delete(id);
+        return val;
+      }
+
+      const ingredients = raw.Ingredients;
+      if (!ingredients || Object.keys(ingredients).length === 0) {
+        const base = raw.Cost != null ? Number(raw.Cost) : 0;
+        cache[id] = base;
+        seen.delete(id);
+        return base;
+      }
+
+      let total = 0;
+      for (const [ingId, qty] of Object.entries(ingredients)) {
+        const q = Number(qty) || 0;
+        total += computeCraftCostById(ingId, cache, seen) * q;
+      }
+
+      cache[id] = total;
+      seen.delete(id);
+      return total;
+    }
+
+    function getMaterialsBreakdown(id, accum = {}) {
+      const raw = craftingDataRaw[id];
+      if (!raw || !raw.Ingredients || Object.keys(raw.Ingredients).length === 0) {
+        // treat as raw material
+        accum[id] = (accum[id] || 0) + 1;
+        return accum;
+      }
+      for (const [ingId, qty] of Object.entries(raw.Ingredients)) {
+        const q = Number(qty) || 0;
+        // if ingredient itself has further ingredients, recurse q times
+        const ingRaw = craftingDataRaw[ingId];
+        if (!ingRaw || !ingRaw.Ingredients || Object.keys(ingRaw.Ingredients).length === 0) {
+          accum[ingId] = (accum[ingId] || 0) + q;
+        } else {
+          // expand recursively and multiply quantities
+          for (let i = 0; i < q; i++) getMaterialsBreakdown(ingId, accum);
+        }
+      }
+      return accum;
+    }
+
+    function computeLoadedInfo(item) {
+      const lowerName = (s) => (s || '').toLowerCase();
+
+      const computeLoaded = (capacity, ammoKey = null) => {
+        const ammoBox = findAmmoBoxItem(ammoKey);
+        if (!ammoBox) return null;
+        const perRound = computeCraftCostById(ammoBox.item.id) / ammoBox.rounds;
+        const loadedPrice = perRound * capacity;
+        return { perRound, loadedPrice, boxName: ammoBox.item.name, boxRounds: ammoBox.rounds };
+      };
+
+      const inferAmmoKeyFromWeaponName = (wname) => {
+        if (!wname) return null;
+        const wt = weaponTypes[wname] || weaponTypes[wname.trim()] || null;
+        const ak = mapTypeToAmmoKey(wt);
+        if (ak) return ak;
+        const lname = lowerName(wname);
+        if (lname.includes('shotgun')) return 'buckshot';
+        if (lname.includes('sniper') || lname.includes('barrett') || lname.includes('m82')) return 'sniper ammo';
+        if (lname.includes('glock') || lname.includes('pistol') || lname.includes('usp') || lname.includes('m9') || lname.includes('p226')) return 'pistol ammo';
+        if (lname.includes('ak') || lname.includes('stanag') || lname.includes('rifle') || lname.includes('scar') || lname.includes('m4') || lname.includes('m16')) return 'rifle ammo';
+        return null;
+      };
+
+      const nm = lowerName(item.name);
+      const isMagazine = nm.includes('magazine') || nm.match(/\bmag\b/);
+      if (isMagazine) {
+        const m = item.name.match(/\(([^)]+)\)/);
+        const weaponRef = m ? m[1].trim() : null;
+        let cap = null;
+        if (weaponRef && capacities[weaponRef]) cap = capacities[weaponRef];
+        if (!cap) {
+          const num = item.name.match(/(\d{1,3})/);
+          if (num) cap = Number(num[1]);
+        }
+        const ammoKey = weaponRef ? inferAmmoKeyFromWeaponName(weaponRef) : null;
+        if (cap) {
+          const loaded = computeLoaded(cap, ammoKey);
+          if (loaded) {
+            return `Magazine capacity: ${cap} — Loaded cost: ${Number(loaded.loadedPrice).toLocaleString()} (per round ${Number(loaded.perRound).toFixed(2)}, box: ${escapeHtml(loaded.boxName)})`;
+          }
+        }
+      }
+
+      // weapon or other item
+      const itemName = item.name.trim();
+
+      // If this is a generated "loaded" variant with attached metadata, use that
+      if (item._sourceId && item.loadedMeta && Array.isArray(item.loadedMeta.mags) && item.loadedMeta.mags.length > 0) {
+        const options = [];
+        for (const m of item.loadedMeta.mags) {
+          const magId = m.id;
+          const magCount = m.count || 1;
+          const magItem = items.find(x => String(x.id) === String(magId));
+          if (!magItem) continue;
+          // determine capacity for this mag
+          let cap = null;
+          if (capacities[magItem.name]) cap = capacities[magItem.name];
+          if (!cap) {
+            const num = (magItem.name || '').match(/(\d{1,3})/);
+            if (num) cap = Number(num[1]);
+          }
+          // magazine crafting cost
+          const magCraft = computeCraftCostById(magItem.id);
+          // ammo key inference prefers magazine then weapon
+          const ammoKey = inferAmmoKeyFromWeaponName(magItem.name) || inferAmmoKeyFromWeaponName(item._sourceId ? (items.find(it=>String(it.id)===String(item._sourceId))||{name:''}).name : item.name) || null;
+          const ammoBox = findAmmoBoxItem(ammoKey);
+          let ammoPerRound = null;
+          let ammoRounds = null;
+          let ammoBoxName = null;
+          if (ammoBox) {
+            ammoPerRound = computeCraftCostById(ammoBox.item.id) / ammoBox.rounds;
+            ammoRounds = ammoBox.rounds;
+            ammoBoxName = ammoBox.item.name;
+          }
+          if (cap && ammoPerRound != null) {
+            const ammoCostTotal = ammoPerRound * cap * magCount;
+            const magsCostTotal = magCraft * magCount;
+            const total = ammoCostTotal + magsCostTotal;
+            options.push(`${escapeHtml(magItem.name)} x${magCount} — Mag craft: ${Number(magsCostTotal).toLocaleString()} — Ammo: ${cap} rounds (box: ${escapeHtml(ammoBoxName)}) cost ${Number(ammoCostTotal).toLocaleString()} — Total loaded: ${Number(total).toLocaleString()}`);
+          } else if (cap) {
+            // no ammo box found, still show mag craft and cap
+            const magsCostTotal = magCraft * magCount;
+            options.push(`${escapeHtml(magItem.name)} x${magCount} — Mag craft: ${Number(magsCostTotal).toLocaleString()} — ${cap} rounds (ammo cost unavailable)`);
+          } else {
+            // no capacity, just show mag craft
+            const magsCostTotal = magCraft * magCount;
+            options.push(`${escapeHtml(magItem.name)} x${magCount} — Mag craft: ${Number(magsCostTotal).toLocaleString()}`);
+          }
+        }
+        if (options.length) return `Loaded options: <div class="small-table">${options.join('<br>')}</div>`;
+      }
+
+      const mags = items.filter(it => {
+        const mm = it.name.match(/\(([^)]+)\)/);
+        if (!mm) return false;
+        const inside = mm[1].trim().toLowerCase();
+        return inside === itemName.toLowerCase() || itemName.toLowerCase().includes(inside);
+      });
+      let cap = null;
+      let ammoKey = null;
+      if (mags.length > 0) {
+        const mm = mags[0].name.match(/\(([^)]+)\)/);
+        const weaponRef = mm ? mm[1].trim() : null;
+        if (weaponRef && capacities[weaponRef]) cap = capacities[weaponRef];
+        if (!cap) {
+          const num = mags[0].name.match(/(\d{1,3})/);
+          if (num) cap = Number(num[1]);
+        }
+        ammoKey = weaponRef ? inferAmmoKeyFromWeaponName(weaponRef) : null;
+      }
+      if (!cap) {
+        const wt = weaponTypes[item.name] || weaponTypes[itemName] || null;
+        if (wt === 'Assault Rifle') cap = 60;
+        else if (wt === 'Pistol' || wt === 'Revolver' || wt === 'Machine Gun') cap = 30;
+        else if (wt === 'Sniper') cap = 10; else if (wt === 'Shotgun') cap = 20;
+        if (!cap && capacities[item.name]) cap = capacities[item.name];
+        ammoKey = mapTypeToAmmoKey(wt);
+      }
+      if (cap) {
+        const loaded = computeLoaded(cap, ammoKey);
+        if (loaded) {
+          return `Loaded: ${cap} rounds — Loaded cost: ${Number(loaded.loadedPrice).toLocaleString()} (per round ${Number(loaded.perRound).toFixed(2)}, box: ${escapeHtml(loaded.boxName)})`;
+        }
+      }
+      return null;
+    }
+
+    const saveState = () => {
+      const state = {
+        profile: Object.fromEntries(Object.entries(profileInputs).map(([key, input]) => [key, input.value.trim()])),
+        prices: customPrices,
+        customItems: customItems
+      };
+      localStorage.setItem('shopBuilderState', JSON.stringify(state));
+    };
+
+    const loadState = () => {
+      const raw = localStorage.getItem('shopBuilderState');
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.profile) {
+          Object.entries(parsed.profile).forEach(([key, value]) => {
+            if (profileInputs[key]) {
+              profileInputs[key].value = value || '';
+            }
+          });
+        }
+        customPrices = parsed.prices || {};
+        customItems = parsed.customItems || {};
+      } catch (error) {
+        console.warn('Could not load saved profile state:', error);
+      }
+    };
+
+    const fetchItems = async () => {
+      itemStatus.textContent = 'Loading craft items…';
+      itemTableBody.innerHTML = '';
+
+      const parseItems = data => Object.entries(data)
+        .map(([id, item]) => ({
+          id,
+          name: item.Name || '',
+          category: item.Category || '',
+          cost: item.Cost != null ? Number(item.Cost) : null,
+          shops: Array.isArray(item.Shops) ? item.Shops : [],
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
+      try {
+        const localResponse = await fetch(localDataUrl, { cache: 'no-store' });
+        if (!localResponse.ok) throw new Error(`Local data unavailable (${localResponse.status})`);
+        const localData = await localResponse.json();
+        // store raw crafting dataset for later craft-cost computation
+        craftingDataRaw = localData;
+        // reset memo cache
+        Object.keys(craftCostCache).forEach(k => delete craftCostCache[k]);
+        items = parseItems(localData);
+        // append any user-created custom items
+        items = items.concat(Object.entries(customItems).map(([id, obj]) => ({
+          id,
+          name: obj.name || ('Custom ' + id),
+          category: obj.category || '',
+          cost: obj.cost != null ? Number(obj.cost) : null,
+          shops: obj.shops || []
+        })));
+        // append loaded variants for weapons/magazines
+        items = addLoadedVariants(items);
+        populateCategoryDropdown();
+        renderItems();
+        itemStatus.textContent = `Showing ${items.length} items from your local crafting backup. Enter your sell price in the right-hand column.`;
+      } catch (localError) {
+        try {
+          const apiResponse = await fetch(apiUrl, { cache: 'no-store' });
+          if (!apiResponse.ok) throw new Error(`API unavailable (${apiResponse.status})`);
+          const apiData = await apiResponse.json();
+          craftingDataRaw = apiData;
+          Object.keys(craftCostCache).forEach(k => delete craftCostCache[k]);
+          items = parseItems(apiData);
+          // append any user-created custom items
+          items = items.concat(Object.entries(customItems).map(([id, obj]) => ({
+            id,
+            name: obj.name || ('Custom ' + id),
+            category: obj.category || '',
+            cost: obj.cost != null ? Number(obj.cost) : null,
+            shops: obj.shops || []
+          })));
+          // append loaded variants for weapons/magazines
+          items = addLoadedVariants(items);
+          populateCategoryDropdown();
+          renderItems();
+          itemStatus.textContent = `Showing ${items.length} items from the live API. Enter your sell price in the right-hand column.`;
+        } catch (apiError) {
+          items = seedItems.map(item => ({ ...item, cost: Number(item.cost) }));
+          // append any user-created custom items
+          items = items.concat(Object.entries(customItems).map(([id, obj]) => ({
+            id,
+            name: obj.name || ('Custom ' + id),
+            category: obj.category || '',
+            cost: obj.cost != null ? Number(obj.cost) : null,
+            shops: obj.shops || []
+          })));
+          // append loaded variants for weapons/magazines
+          items = addLoadedVariants(items);
+          populateCategoryDropdown();
+          renderItems();
+          itemStatus.innerHTML = `Unable to load the local backup or the live API, so a starter item list is being used instead. ${escapeHtml(localError.message)} • ${escapeHtml(apiError.message)}`;
+        }
+      }
+    };
+
+    const filterItems = () => {
+      const filter = itemSearchInput.value.trim().toLowerCase();
+      if (!filter) return items;
+      return items.filter(item => {
+        return item.name.toLowerCase().includes(filter)
+          || item.category.toLowerCase().includes(filter)
+          || item.shops.some(shop => shop.toLowerCase().includes(filter));
+      });
+    };
+
+    const renderItems = () => {
+      const visibleItems = filterItems();
+      itemTableBody.innerHTML = visibleItems.map(item => {
+        const value = customPrices[item.id] ?? '';
+        const shopsLabel = item.shops.length ? item.shops.join(', ') : 'None';
+        // compute craft cost from ingredients (if available)
+        const craftCost = computeCraftCostById(item.id);
+
+        // prepare materials toggle markup
+        let materialsHtml = '';
+        // decide whether this category should show loaded pricing
+        let loadedInfoHtml = '';
+        const _cat = (item.category || '').toLowerCase();
+        if (_cat === 'weapon components' || _cat === 'weapon component') {
+          // explicit: weapon components do not get loaded pricing
+          loadedInfoHtml = '';
+        } else if (_cat === 'weaponry' || _cat.includes('magazine') || _cat === 'magazines') {
+          loadedInfoHtml = computeLoadedInfo(item) || '';
+        } else {
+          // other categories do not get loaded pricing
+          loadedInfoHtml = '';
+        }
+        if (craftingDataRaw && craftingDataRaw[item.id] && craftingDataRaw[item.id].Ingredients && Object.keys(craftingDataRaw[item.id].Ingredients).length > 0) {
+          const breakdown = getMaterialsBreakdown(item.id);
+          const parts = Object.entries(breakdown).map(([matId, qty]) => {
+            const raw = craftingDataRaw[matId];
+            const name = raw && raw.Name ? raw.Name : (`${matId}`);
+            const matCost = computeCraftCostById(matId);
+            return `<li>${escapeHtml(name)} (x${qty}) — ${Number(matCost).toLocaleString()}</li>`;
+          }).join('');
+
+          // compute loaded-magazine/weapon info (only fill if allowed by category)
+          // NOTE: `loadedInfoHtml` is declared above; reassign here when appropriate
+          if (_cat === 'weaponry' || _cat.includes('magazine') || _cat === 'magazines') {
+            const lowerName = (s) => (s || '').toLowerCase();
+
+            // helper to compute loaded price given capacity and ammoKey
+            const computeLoaded = (capacity, ammoKey = null) => {
+              const ammoBox = findAmmoBoxItem(ammoKey);
+              if (!ammoBox) return null;
+              const perRound = computeCraftCostById(ammoBox.item.id) / ammoBox.rounds;
+              const loadedPrice = perRound * capacity;
+              return { perRound, loadedPrice, boxName: ammoBox.item.name, boxRounds: ammoBox.rounds };
+            };
+
+            // determine ammoKey from weapon type
+            const inferAmmoKeyFromWeaponName = (wname) => {
+              if (!wname) return null;
+              const wt = weaponTypes[wname] || weaponTypes[wname.trim()] || null;
+              const ak = mapTypeToAmmoKey(wt);
+              if (ak) return ak;
+              // fallback heuristics by string
+              const lname = lowerName(wname);
+              if (lname.includes('shotgun')) return 'buckshot';
+              if (lname.includes('sniper') || lname.includes('barrett') || lname.includes('m82')) return 'sniper ammo';
+              if (lname.includes('glock') || lname.includes('pistol') || lname.includes('usp') || lname.includes('m9') || lname.includes('p226')) return 'pistol ammo';
+              if (lname.includes('ak') || lname.includes('stanag') || lname.includes('rifle') || lname.includes('scar') || lname.includes('m4') || lname.includes('m16')) return 'rifle ammo';
+              return null;
+            };
+
+            // If this item is a magazine (name contains 'magazine' or 'mag') try to infer the weapon and capacity
+            const nm = lowerName(item.name);
+            const isMagazine = nm.includes('magazine') || nm.match(/\bmag\b/);
+            if (isMagazine) {
+              const m = item.name.match(/\(([^)]+)\)/);
+              const weaponRef = m ? m[1].trim() : null;
+              let cap = null;
+              if (weaponRef && capacities[weaponRef]) cap = capacities[weaponRef];
+              // fallback: look for a number in the mag name
+              if (!cap) {
+                const num = item.name.match(/(\d{1,3})/);
+                if (num) cap = Number(num[1]);
+              }
+              // determine ammoKey
+              const ammoKey = weaponRef ? inferAmmoKeyFromWeaponName(weaponRef) : null;
+              if (cap) {
+                const loaded = computeLoaded(cap, ammoKey);
+                if (loaded) {
+                  loadedInfoHtml = `<div class="small-table">Magazine capacity: ${cap} — Loaded cost: ${Number(loaded.loadedPrice).toLocaleString()} (per round ${Number(loaded.perRound).toFixed(2)}, box: ${escapeHtml(loaded.boxName)})</div>`;
+                }
+              }
+            } else {
+              // If this item is a weapon (category or known name), show loaded pricing using associated magazines or defaults
+              const itemName = item.name.trim();
+              const mags = items.filter(it => {
+                const mm = it.name.match(/\(([^)]+)\)/);
+                if (!mm) return false;
+                const inside = mm[1].trim().toLowerCase();
+                return inside === itemName.toLowerCase() || itemName.toLowerCase().includes(inside);
+              });
+              let cap = null;
+              let ammoKey = null;
+              if (mags.length > 0) {
+                // use first mag's inferred capacity (from weaponRef)
+                const mm = mags[0].name.match(/\(([^)]+)\)/);
+                const weaponRef = mm ? mm[1].trim() : null;
+                if (weaponRef && capacities[weaponRef]) cap = capacities[weaponRef];
+                if (!cap) {
+                  const num = mags[0].name.match(/(\d{1,3})/);
+                  if (num) cap = Number(num[1]);
+                }
+                ammoKey = weaponRef ? inferAmmoKeyFromWeaponName(weaponRef) : null;
+              }
+              if (!cap) {
+                // fallback rules by weapon type
+                const wt = weaponTypes[item.name] || weaponTypes[itemName] || null;
+                if (wt === 'Assault Rifle') cap = 60; // 2 STANAG magazines -> 60 rounds
+                else if (wt === 'Pistol' || wt === 'Revolver' || wt === 'Machine Gun') cap = 30;
+                else if (wt === 'Sniper') cap = 10; else if (wt === 'Shotgun') cap = 20;
+                // final fallback: look up capacities map directly
+                if (!cap && capacities[item.name]) cap = capacities[item.name];
+                ammoKey = mapTypeToAmmoKey(wt);
+              }
+              if (cap) {
+                const loaded = computeLoaded(cap, ammoKey);
+                if (loaded) {
+                  loadedInfoHtml = `<div class="small-table">Loaded: ${cap} rounds — Loaded cost: ${Number(loaded.loadedPrice).toLocaleString()} (per round ${Number(loaded.perRound).toFixed(2)}, box: ${escapeHtml(loaded.boxName)})</div>`;
+                }
+              }
+            }
+          }
+
+          materialsHtml = `\n              <div class="small-table">\n                <a href="#" class="toggle-materials" data-id="${escapeHtml(item.id)}">Show materials</a>\n                <div class="materials" data-id="${escapeHtml(item.id)}" style="display:none;margin-top:6px;">\n                  <ul class="small-table" style="margin:6px 0 0 1rem;">${parts}</ul>\n                </div>\n              </div>`;
+        }
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name)}</strong>
+              <div class="small-table">ID: ${escapeHtml(item.id)}</div>
+              ${customItems[item.id] && customItems[item.id].description ? `<div class="small-table">Description: ${escapeHtml(customItems[item.id].description)}</div>` : ''}
+            </td>
+            <td>${escapeHtml(item.category)}</td>
+            <td>${materialsHtml || '—'}</td>
+            <td>${craftCost != null ? Number(craftCost).toLocaleString() : '—'}</td>
+            <td>${loadedInfoHtml || '—'}</td>
+            <td>${escapeHtml(shopsLabel)}</td>
+            <td>
+              <input type="number" min="0" step="1" data-item-id="${escapeHtml(item.id)}" value="${value}" placeholder="Enter sell price" />
+            </td>
+          </tr>`;
+      }).join('');
+      if (!visibleItems.length) {
+        itemTableBody.innerHTML = '<tr><td colspan="7" class="small-table">No matching items found. Try a different search term.</td></tr>';
+      }
+      attachPriceListeners();
+      // attach toggle handlers for materials links
+      itemTableBody.querySelectorAll('.toggle-materials').forEach(a => {
+        a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          const id = a.getAttribute('data-id');
+          const box = itemTableBody.querySelector(`.materials[data-id="${id}"]`);
+          if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        });
+      });
+    };
+
+    const attachPriceListeners = () => {
+      itemTableBody.querySelectorAll('input[data-item-id]').forEach(input => {
+        input.addEventListener('input', event => {
+          const target = event.target;
+          const itemId = target.getAttribute('data-item-id');
+          const rawValue = target.value.trim();
+          if (rawValue === '') {
+            delete customPrices[itemId];
+          } else {
+            const numeric = Number(rawValue);
+            if (!Number.isNaN(numeric)) {
+              customPrices[itemId] = numeric;
+            }
+          }
+          saveState();
+        });
+      });
+    };
+
+    const getProfileData = () => {
+      const profile = Object.fromEntries(Object.entries(profileInputs).map(([key, input]) => [key, input.value.trim()]));
+      return {
+        characterName: profile.characterName,
+        shopName: profile.shopName || null,
+        steamName: profile.steamName || null,
+        discordName: profile.discordName || null,
+        phoneNumber: profile.inGamePhone || null,
+        bankInfo: profile.bankInfo || null,
+        description: profile.profileDescription || null,
+        additionalServices: profile.additionalServices || null,
+        additionalShopInfo: profile.additionalShopInfo || null,
+        profileImage: profile.profileImage || null,
+        organizationName: profile.organizationName || null,
+        organizationImage: profile.organizationImage || null,
+      };
+    };
+
+    const buildExportData = () => {
+      const profile = getProfileData();
+      if (!profile.characterName) {
+        exportStatus.textContent = 'Character Name is required before exporting.';
+        return null;
+      }
+      if (!profile.phoneNumber) {
+        exportStatus.textContent = 'In-game Phone Number is required before exporting.';
+        return null;
+      }
+      const pricedItems = items.map(item => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        // computed craft cost from Ingredients (0 for non-craftable/raw items)
+        craftCost: computeCraftCostById(item.id),
+        // original Cost field is a suggested sale price — expose it as suggestedPrice
+        suggestedPrice: item.cost,
+        // include custom description when available
+        description: (customItems[item.id] && customItems[item.id].description) ? customItems[item.id].description : null,
+        shops: item.shops,
+        sellPrice: customPrices[item.id] != null ? customPrices[item.id] : null,
+      }));
+      return {
+        profile,
+        items: pricedItems,
+        exportedAt: new Date().toISOString(),
+      };
+    };
+
+    const escapeHtml = text => String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    exportButton.addEventListener('click', () => {
+      const payload = buildExportData();
+      if (!payload) return;
+      const text = JSON.stringify(payload, null, 2);
+      exportOutput.value = text;
+      exportStatus.textContent = 'Export data is ready. Copy it or download it for use in another app.';
+    });
+
+    copyButton.addEventListener('click', async () => {
+      if (!exportOutput.value) {
+        exportStatus.textContent = 'Generate export data first before copying.';
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(exportOutput.value);
+        exportStatus.textContent = 'Export JSON copied to clipboard.';
+      } catch (error) {
+        exportStatus.textContent = 'Copy failed. Your browser may block clipboard access.';
+      }
+    });
+
+    downloadButton.addEventListener('click', () => {
+      if (!exportOutput.value) {
+        exportStatus.textContent = 'Generate export data first before downloading.';
+        return;
+      }
+      const blob = new Blob([exportOutput.value], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'perpheads-shop-profile.json';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+      exportStatus.textContent = 'JSON file download started.';
+    });
+
+    itemSearchInput.addEventListener('input', () => renderItems());
+    refreshButton.addEventListener('click', fetchItems);
+    Object.values(profileInputs).forEach(input => input.addEventListener('input', saveState));
+
+    // Add / clear handlers for custom item creator
+    const clearCustomInputs = () => {
+      if (ciName) ciName.value = '';
+      if (ciCategory) ciCategory.value = '';
+      if (ciDescription) ciDescription.value = '';
+      if (ciStatus) ciStatus.textContent = 'Create custom items to appear in the list for pricing and export.';
+    };
+
+    // populate category dropdown with existing categories (after items load)
+    const populateCategoryDropdown = () => {
+      if (!ciCategory) return;
+      // collect unique categories from current items
+      const cats = Array.from(new Set(items.map(i => (i.category || '').trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:'base'}));
+      ciCategory.innerHTML = '<option value="">-- Select category --</option>' + cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    };
+
+    const addCustomItem = () => {
+      if (!ciName || !ciName.value.trim()) {
+        if (ciStatus) ciStatus.textContent = 'Item name is required.';
+        return;
+      }
+      const id = 'custom-' + Date.now();
+      const obj = {
+        name: ciName.value.trim(),
+        category: ciCategory && ciCategory.value ? ciCategory.value.trim() : '',
+        description: ciDescription && ciDescription.value ? ciDescription.value.trim() : '',
+        shops: []
+      };
+      customItems[id] = obj;
+      // push into items list so it appears immediately
+      items.push({ id, name: obj.name, category: obj.category, cost: obj.cost, shops: obj.shops });
+      saveState();
+      renderItems();
+      if (ciStatus) ciStatus.textContent = `Added custom item: ${obj.name}`;
+      clearCustomInputs();
+    };
+
+    if (ciAddButton) ciAddButton.addEventListener('click', addCustomItem);
+    if (ciClearButton) ciClearButton.addEventListener('click', (e) => { e.preventDefault(); clearCustomInputs(); });
+
+    loadState();
+    fetchItems();
+  </script>
+</body>
+</html>

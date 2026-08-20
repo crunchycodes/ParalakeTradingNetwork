@@ -113,6 +113,21 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="signInWithProvider('discord')" class="inline-flex items-center justify-center gap-2 bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-xs py-2.5 rounded-xl transition-colors">
+                    <i class="fa-brands fa-discord"></i>
+                    <span>Discord</span>
+                </button>
+                <button type="button" onclick="signInWithProvider('github')" class="inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 rounded-xl transition-colors">
+                    <i class="fa-brands fa-github"></i>
+                    <span>GitHub</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 text-[10px] text-slate-500 uppercase tracking-wider">
+                <div class="h-px bg-slate-800 flex-1"></div>
+                <span>or use email</span>
+                <div class="h-px bg-slate-800 flex-1"></div>
+            </div>
             <form id="authForm" onsubmit="submitAuthForm(event)" class="space-y-3">
                 <input id="authEmail" type="email" required autocomplete="email" placeholder="Email address" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
                 <input id="authPassword" type="password" required autocomplete="current-password" placeholder="Password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
@@ -269,7 +284,7 @@
             activeShopsData = [];
 
             let subfolders = new Set();
-            const IGNORED_DIRS = ['img', 'images', 'assets', 'listed', 'css', 'js', 'media'];
+            const IGNORED_DIRS = ['img', 'images', 'assets', 'listed', 'application', 'js', 'media'];
 
             // 1. Query GitHub Contents API to dynamically find subfolders
             try {
@@ -1078,6 +1093,15 @@
                 submitButton.disabled = false;
                 submitButton.classList.remove('opacity-60', 'cursor-not-allowed');
             }
+        }
+
+        async function signInWithProvider(provider) {
+            showAuthMessage('', '');
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider,
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+            if (error) showAuthMessage(error.message || `Unable to sign in with ${provider}.`);
         }
 
         async function signOutUser() {
