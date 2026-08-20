@@ -213,7 +213,7 @@
         let savedFolders = [];    // Custom folders stored in LocalStorage
 
         // Known default fallback folders if API fails or offline
-        const DEFAULT_KNOWN_FOLDERS = ["Sams-Shop"];
+        const DEFAULT_KNOWN_FOLDERS = ["Samuels-Shop", "Sams-Shop"];
 
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedFolders();
@@ -293,9 +293,10 @@
             // Clean folder path
             const cleanFolder = folderName.replace(/^\/+|\/+$/g, '');
             
-            // Try relative URL first (works when hosted in same repo), fallback to GitHub Pages absolute URL
+            // Try relative URL first, then GitHub Pages, then direct Raw GitHub Repo content
             const jsonRelativeUrl = `./${cleanFolder}/perpheads-shop-profile.json`;
             const jsonAbsoluteUrl = `${BASE_URL}/${cleanFolder}/perpheads-shop-profile.json`;
+            const jsonRawUrl = `https://raw.githubusercontent.com/${REPO_NAME}/main/${cleanFolder}/perpheads-shop-profile.json`;
 
             let profileData = null;
 
@@ -303,6 +304,9 @@
                 let resp = await fetch(jsonRelativeUrl, { cache: 'no-store' });
                 if (!resp.ok) {
                     resp = await fetch(jsonAbsoluteUrl, { cache: 'no-store' });
+                }
+                if (!resp.ok) {
+                    resp = await fetch(jsonRawUrl, { cache: 'no-store' });
                 }
                 if (resp.ok) {
                     const data = await resp.json();
@@ -321,6 +325,7 @@
             return {
                 folderName: cleanFolder,
                 shopLink: `${BASE_URL}/${cleanFolder}/`,
+                githubLink: `https://github.com/${REPO_NAME}/tree/main/${cleanFolder}`,
                 profile: profileData ? profileData.profile || {} : {},
                 pricedItemsCount: pricedItemsCount,
                 hasData: !!profileData
@@ -396,15 +401,15 @@
                                     </h4>
                                     <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 truncate">
                                         <i class="fa-solid fa-user-tag text-emerald-400 text-[10px]"></i> ${escapeHtml(ownerName)}
-                                    </p>
-                                </div>
+                        <!-- Subfolder URL Tag & GitHub Source Link -->
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800/80 px-2.5 py-1 rounded-lg text-[11px] font-mono text-emerald-400/90 truncate flex-grow">
+                                <i class="fa-regular fa-folder text-slate-500"></i>
+                                <span class="truncate">/${escapeHtml(shop.folderName)}</span>
                             </div>
-                        </div>
-
-                        <!-- Subfolder URL Tag -->
-                        <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800/80 px-2.5 py-1 rounded-lg text-[11px] font-mono text-emerald-400/90 w-full truncate">
-                            <i class="fa-regular fa-folder text-slate-500"></i>
-                            <span class="truncate">/${escapeHtml(shop.folderName)}</span>
+                            <a href="${escapeHtml(shop.githubLink)}" target="_blank" rel="noopener noreferrer" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 p-1.5 rounded-lg text-[11px] text-slate-400 hover:text-white transition flex-shrink-0" title="View Folder on GitHub">
+                                <i class="fa-brands fa-github"></i>
+                            </a>
                         </div>
 
                         <!-- Description Preview -->
