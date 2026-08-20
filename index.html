@@ -170,6 +170,14 @@
                 <p id="profileMessage" class="hidden text-xs rounded-lg p-3"></p>
                 <button id="profileSaveButton" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm py-2.5 rounded-xl transition-colors">Save Profile</button>
             </form>
+            <div class="border-t border-slate-800 pt-4 space-y-3">
+                <h3 class="text-sm font-bold text-white">Shops</h3>
+                <div id="profileShopsList" class="space-y-2"></div>
+                <a id="profileGetListedButton" href="https://crunchycodes.github.io/ParalakeTradingNetwork/listed/" class="hidden w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition-all">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Get Listed</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -852,6 +860,7 @@
             const characterName = extractValue(p, ['characterName', 'character_name', 'character', 'charName', 'char_name', 'ownerName', 'owner_name', 'owner', 'merchantName', 'merchant_name', 'merchant', 'sellerName', 'seller_name', 'seller', 'playerName', 'player_name', 'player', 'author'], 'Unknown Merchant');
             const contactPhone = extractValue(p, ['contactPhone', 'contact_phone', 'phoneNumber', 'phone_number', 'phone', 'contact', 'number', 'mobile', 'tel', 'cell'], 'N/A');
             const organizationName = extractValue(p, ['organizationName', 'organization_name', 'organization', 'org', 'orgName', 'org_name', 'group', 'faction', 'clan'], '');
+            const ownerUserId = extractValue(p, ['owner', 'ownerId', 'owner_id', 'ownerUserId', 'owner_user_id'], '');
             const shopNotes = extractValue(p, ['shopNotes', 'shop_notes', 'description', 'shopDescription', 'shop_description', 'notes', 'about', 'bio', 'tagline', 'summary', 'details', 'info', 'notice', 'text'], 'No description provided.');
             let imgUrl = extractValue(p, ['profileImage', 'profile_image', 'shopImage', 'shop_image', 'logo', 'avatar', 'image', 'icon', 'picture'], '');
 
@@ -872,6 +881,7 @@
                     characterName,
                     contactPhone,
                     organizationName,
+                    ownerUserId,
                     shopNotes,
                     profileImage: imgUrl,
                     inventory
@@ -1150,12 +1160,36 @@
                 .eq('id', data.user.id)
                 .maybeSingle();
             document.getElementById('profileEmailNotifications').checked = profile?.email_notifications === true;
+            renderProfileShops(data.user.id);
             showProfileMessage('', '');
 
             const modal = document.getElementById('profileModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             document.getElementById('profileDisplayName').focus();
+        }
+
+        function renderProfileShops(userId) {
+            const shopsList = document.getElementById('profileShopsList');
+            const getListedButton = document.getElementById('profileGetListedButton');
+            const ownedShops = activeShopsData.filter(shop => {
+                const ownerId = String(shop.profile?.ownerUserId || '').trim().toLowerCase();
+                return ownerId && ownerId === String(userId).trim().toLowerCase();
+            });
+
+            if (ownedShops.length === 0) {
+                shopsList.innerHTML = '<p class="text-xs text-slate-400">No shops are connected to this account yet.</p>';
+                getListedButton.classList.remove('hidden');
+                return;
+            }
+
+            getListedButton.classList.add('hidden');
+            shopsList.innerHTML = ownedShops.map(shop => `
+                <a href="${REPO_BASE_URL}/${encodeURIComponent(shop.folderName)}/" class="flex items-center justify-between gap-3 bg-slate-950 border border-slate-800 hover:border-emerald-500/50 rounded-xl px-3 py-2.5 text-xs text-slate-200 transition-colors">
+                    <span class="font-semibold truncate">${escapeHtml(shop.profile.shopName || shop.folderName)}</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-emerald-400 shrink-0"></i>
+                </a>
+            `).join('');
         }
 
         function closeProfileModal() {
