@@ -335,7 +335,28 @@
                     targetFolderName = featEntry;
                 } else if (typeof featEntry === 'object' && featEntry !== null) {
                     targetFolderName = featEntry.folder || featEntry.folderName || featEntry.shop || featEntry.shopName || featEntry.name || featEntry.path || '';
-                    customFeaturedItems = featEntry.items || featEntry.featuredItems || featEntry.products || [];
+                    
+                    // Extract item1, item2, item3, item4... keys explicitly
+                    for (let i = 1; i <= 10; i++) {
+                        const itemVal = featEntry[`item${i}`] || featEntry[`Item${i}`];
+                        if (itemVal) {
+                            customFeaturedItems.push(itemVal);
+                        }
+                    }
+
+                    if (Array.isArray(featEntry.items)) customFeaturedItems.push(...featEntry.items);
+                    if (Array.isArray(featEntry.featuredItems)) customFeaturedItems.push(...featEntry.featuredItems);
+                    if (Array.isArray(featEntry.products)) customFeaturedItems.push(...featEntry.products);
+                }
+
+                // Fallback to top-level item1..item4 if entry is simple string
+                if (customFeaturedItems.length === 0 && typeof featuredConfig === 'object' && featuredConfig !== null) {
+                    for (let i = 1; i <= 10; i++) {
+                        const itemVal = featuredConfig[`item${i}`] || featuredConfig[`Item${i}`];
+                        if (itemVal) {
+                            customFeaturedItems.push(itemVal);
+                        }
+                    }
                 }
 
                 // Clean folder name string (remove leading/trailing slashes e.g. /Bing-Bong/)
@@ -363,36 +384,63 @@
                 const folder = shopData.folderName;
                 const shopUrl = `${REPO_BASE_URL}/${folder}`;
 
-                // Extract priced inventory items from perpheads-shop-profile.json
+                // Extract full inventory from shop profile
                 let inventory = profile.inventory || [];
-                
-                // Filter to items with prices
-                let pricedItems = inventory.filter(item => {
-                    const price = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice;
-                    return price !== null && price !== undefined && price !== '';
-                });
+                let itemsToShow = [];
 
-                // If specific items were specified in featuredshops.json, filter/prioritize them
                 if (customFeaturedItems.length > 0) {
-                    const customPriced = inventory.filter(item => {
-                        const id = String(item.id || item.itemId || item.name || '').toLowerCase();
-                        return customFeaturedItems.some(f => {
-                            const matchStr = String(typeof f === 'object' ? (f.id || f.name) : f).toLowerCase();
-                            return id === matchStr || String(item.name || '').toLowerCase().includes(matchStr);
+                    // Match each item1..item4 against the shop's inventory
+                    itemsToShow = customFeaturedItems.map(featItem => {
+                        const targetStr = String(typeof featItem === 'object' ? (featItem.name || featItem.id || featItem.title || '') : featItem).trim();
+                        const targetLower = targetStr.toLowerCase();
+
+                        // Exact match search by ID or Name
+                        let match = inventory.find(inv => {
+                            const invId = String(inv.id || inv.itemId || '').toLowerCase();
+                            const invName = String(inv.name || inv.title || inv.itemName || '').toLowerCase();
+                            return (invId && invId === targetLower) || (invName && invName === targetLower);
                         });
+
+                        // Partial match search
+                        if (!match) {
+                            match = inventory.find(inv => {
+                                const invId = String(inv.id || inv.itemId || '').toLowerCase();
+                                const invName = String(inv.name || inv.title || inv.itemName || '').toLowerCase();
+                                return (invId && (invId.includes(targetLower) || targetLower.includes(invId))) ||
+                                       (invName && (invName.includes(targetLower) || targetLower.includes(invName)));
+                            });
+                        }
+
+                        if (match) {
+                            return match;
+                        } else {
+                            // Construct representation if not explicitly matched in inventory
+                            const rawP = typeof featItem === 'object' ? (featItem.sellPrice ?? featItem.price ?? featItem.cost ?? null) : null;
+                            return {
+                                name: targetStr || 'Featured Item',
+                                id: typeof featItem === 'object' ? (featItem.id || targetStr) : targetStr,
+                                price: rawP,
+                                category: typeof featItem === 'object' ? (featItem.category || 'weaponry') : 'weaponry'
+                            };
+                        }
                     });
-                    if (customPriced.length > 0) {
-                        pricedItems = customPriced;
-                    }
+                } else {
+                    // Fallback to all priced items in shop inventory
+                    itemsToShow = inventory.filter(item => {
+                        const price = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice;
+                        return price !== null && price !== undefined && price !== '';
+                    });
                 }
 
-                // Construct item elements HTML with prices directly from perpheads-shop-profile.json
+                // Construct item elements HTML
                 let itemsHtml = '';
-                if (pricedItems.length > 0) {
-                    itemsHtml = pricedItems.slice(0, 6).map(item => {
+                if (itemsToShow.length > 0) {
+                    itemsHtml = itemsToShow.slice(0, 4).map(item => {
                         const itemName = escapeHtml(item.name || item.title || item.itemName || item.id || 'Item');
-                        const rawPrice = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice ?? 0;
-                        const formattedPrice = typeof rawPrice === 'number' ? `$${rawPrice.toLocaleString()}` : `$${rawPrice}`;
+                        const rawPrice = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice;
+                        const formattedPrice = (rawPrice !== null && rawPrice !== undefined && rawPrice !== '') 
+                            ? (typeof rawPrice === 'number' ? `$${rawPrice.toLocaleString()}` : `$${rawPrice}`) 
+                            : 'Inquire';
                         const itemId = item.id || item.itemId || item.name || '';
                         const category = item.category || item.type || 'weaponry';
 
@@ -426,7 +474,7 @@
                 } else {
                     itemsHtml = `
                         <div class="col-span-2 text-xs text-slate-400 italic bg-slate-950/60 p-3 rounded-xl border border-slate-800/60">
-                            No listed items currently priced in shop profile.
+                            No specified featured items found for this shop.
                         </div>
                     `;
                 }
@@ -467,9 +515,9 @@
                             <div class="flex items-center justify-between text-xs">
                                 <span class="font-bold text-slate-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                                     <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
-                                    Featured Stock &amp; Prices
+                                    Featured Items (item1–item4)
                                 </span>
-                                <span class="text-[11px] text-emerald-400 font-mono font-semibold">${pricedItems.length} Priced Items</span>
+                                <span class="text-[11px] text-emerald-400 font-mono font-semibold">${itemsToShow.length} Featured Items</span>
                             </div>
                             
                             <!-- Items Grid -->
