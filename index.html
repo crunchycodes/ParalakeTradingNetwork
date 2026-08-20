@@ -112,7 +112,23 @@
             </div>
         </section>
 
-        <!-- Search and Filter Bar -->
+    <!-- Featured Shops & Items Section -->
+    <section id="featuredSection" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    Featured Shops &amp; Hot Deals
+                </span>
+            </div>
+        </div>
+
+        <div id="featuredCardsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Featured Shop Cards will be injected dynamically -->
+        </div>
+    </section>
+
+    <!-- Search and Filter Bar -->
     <section class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
         <div class="relative w-full md:w-96">
             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -195,6 +211,7 @@
         const KNOWN_FOLDERS = ['Samuels-Shop', 'Sams-Shop'];
         
         let activeShopsData = [];
+        let featuredConfig = null;
 
         // Initialize application on load
         window.onload = function() {
@@ -206,15 +223,17 @@
             const loadingState = document.getElementById('loadingState');
             const shopsGrid = document.getElementById('shopsGrid');
             const emptyState = document.getElementById('emptyState');
-            const refreshIcon = document.getElementById('refreshIcon');
 
-            if (refreshIcon) refreshIcon.classList.add('animate-spin');
             loadingState.classList.remove('hidden');
             emptyState.classList.add('hidden');
             shopsGrid.innerHTML = '';
             activeShopsData = [];
 
+            // Fetch featured shops config in parallel
+            fetchFeaturedConfig();
+
             let subfolders = new Set();
+            const IGNORED_DIRS = ['img', 'images', 'assets', 'static', 'css', 'js', 'media'];
 
             // 1. Query GitHub Contents API to dynamically find subfolders
             try {
@@ -223,7 +242,7 @@
                     const contents = await apiResponse.json();
                     if (Array.isArray(contents)) {
                         contents.forEach(item => {
-                            if (item.type === 'dir' && !item.name.startsWith('.')) {
+                            if (item.type === 'dir' && !item.name.startsWith('.') && !IGNORED_DIRS.includes(item.name.toLowerCase())) {
                                 subfolders.add(item.name);
                             }
                         });
@@ -246,10 +265,211 @@
             activeShopsData = results.filter(shop => shop !== null);
 
             loadingState.classList.add('hidden');
-            if (refreshIcon) refreshIcon.classList.remove('animate-spin');
 
-            // Render shop cards
+            // Render shop cards & update featured items spotlight
             renderShopCards(activeShopsData);
+            renderFeaturedShops();
+        }
+
+        async function fetchFeaturedConfig() {
+            const urls = [
+                './featuredshops.json',
+                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/featuredshops.json`,
+                `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/featuredshops.json`
+            ];
+
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (res.ok) {
+                        featuredConfig = await res.json();
+                        renderFeaturedShops();
+                        break;
+                    }
+                } catch (e) {
+                    // Try next source fallback
+                }
+            }
+        }
+
+        function renderFeaturedShops() {
+            if (!featuredConfig || !activeShopsData.length) return;
+
+            const featuredSection = document.getElementById('featuredSection');
+            const container = document.getElementById('featuredCardsContainer');
+            if (!featuredSection || !container) return;
+
+            // Extract featured list from config flexible schema
+            let featuredList = [];
+            if (Array.isArray(featuredConfig)) {
+                featuredList = featuredConfig;
+            } else if (featuredConfig.featuredShops && Array.isArray(featuredConfig.featuredShops)) {
+                featuredList = featuredConfig.featuredShops;
+            } else if (featuredConfig.shops && Array.isArray(featuredConfig.shops)) {
+                featuredList = featuredConfig.shops;
+            } else if (featuredConfig.featured && Array.isArray(featuredConfig.featured)) {
+                featuredList = featuredConfig.featured;
+            }
+
+            if (!featuredList.length) return;
+
+            container.innerHTML = '';
+            let featuredCount = 0;
+
+            featuredList.forEach(featEntry => {
+                let targetFolderName = '';
+                let customFeaturedItems = [];
+
+                if (typeof featEntry === 'string') {
+                    targetFolderName = featEntry;
+                } else if (typeof featEntry === 'object' && featEntry !== null) {
+                    targetFolderName = featEntry.folder || featEntry.folderName || featEntry.shop || featEntry.shopName || featEntry.name || '';
+                    customFeaturedItems = featEntry.items || featEntry.featuredItems || featEntry.products || [];
+                }
+
+                if (!targetFolderName) return;
+
+                // Find matching loaded shop
+                const shopData = activeShopsData.find(s => 
+                    s.folderName.toLowerCase() === targetFolderName.toLowerCase() ||
+                    (s.profile.shopName && s.profile.shopName.toLowerCase() === targetFolderName.toLowerCase())
+                );
+
+                if (!shopData) return;
+
+                const profile = shopData.profile;
+                const folder = shopData.folderName;
+                const shopUrl = `${REPO_BASE_URL}/${folder}`;
+
+                // Extract priced inventory items
+                let inventory = profile.inventory || [];
+                
+                // Filter to items with prices
+                let pricedItems = inventory.filter(item => {
+                    const price = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice;
+                    return price !== null && price !== undefined && price !== '';
+                });
+
+                // If specific items were featured in featuredshops.json, prioritize or filter
+                if (customFeaturedItems.length > 0) {
+                    const customPriced = inventory.filter(item => {
+                        const id = String(item.id || item.itemId || item.name || '').toLowerCase();
+                        return customFeaturedItems.some(f => String(f).toLowerCase() === id);
+                    });
+                    if (customPriced.length > 0) {
+                        pricedItems = customPriced;
+                    }
+                }
+
+                // Construct item elements HTML
+                let itemsHtml = '';
+                if (pricedItems.length > 0) {
+                    itemsHtml = pricedItems.slice(0, 4).map(item => {
+                        const itemName = escapeHtml(item.name || item.title || item.itemName || item.id || 'Item');
+                        const rawPrice = item.sellPrice ?? item.price ?? item.cost ?? item.unitPrice ?? 0;
+                        const formattedPrice = typeof rawPrice === 'number' ? `$${rawPrice.toLocaleString()}` : `$${rawPrice}`;
+                        const itemId = item.id || item.itemId || item.name || '';
+                        const category = item.category || item.type || 'weaponry';
+
+                        // Resolve image paths
+                        let itemImg = item.image || item.imageUrl || item.icon || '';
+                        if (!itemImg && itemId) {
+                            itemImg = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/img/${category}/${itemId}.png`;
+                        }
+
+                        const fallbackImg1 = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/img/${itemId}.png`;
+                        const fallbackImg2 = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/img/weaponry/${itemId}.png`;
+
+                        return `
+                            <div class="bg-slate-950/90 border border-slate-800 hover:border-amber-500/40 rounded-xl p-2.5 flex items-center gap-3 transition-all duration-200 group/item">
+                                <div class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden relative">
+                                    <img src="${escapeHtml(itemImg)}" 
+                                         alt="${itemName}" 
+                                         class="w-full h-full object-contain p-1 group-hover/item:scale-110 transition-transform"
+                                         onerror="this.onerror=null; this.src='${fallbackImg1}'; this.onerror=function(){this.onerror=null; this.src='${fallbackImg2}'; this.onerror=function(){this.parentNode.innerHTML='<i class=\\'fa-solid fa-box text-slate-600 text-xs\\'></i>';}};">
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-semibold text-slate-200 truncate group-hover/item:text-amber-300 transition-colors">${itemName}</div>
+                                    <div class="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
+                                        <i class="fa-solid fa-tag text-[10px] text-emerald-500"></i>
+                                        ${escapeHtml(formattedPrice)}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    itemsHtml = `
+                        <div class="col-span-2 text-xs text-slate-400 italic bg-slate-950/60 p-3 rounded-xl border border-slate-800/60">
+                            No listed items currently priced for this featured shop.
+                        </div>
+                    `;
+                }
+
+                const featuredCardHtml = `
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border-2 border-amber-500/30 hover:border-amber-500/60 rounded-2xl p-5 shadow-xl relative overflow-hidden transition-all duration-300 group">
+                        <!-- Top Accent Glow -->
+                        <div class="absolute -top-12 -right-12 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <!-- Header Info -->
+                        <div class="flex items-start justify-between gap-4 border-b border-slate-800/80 pb-4 mb-4">
+                            <div class="flex items-center gap-3.5 min-w-0">
+                                <div class="w-14 h-14 rounded-2xl bg-slate-950 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl overflow-hidden font-bold shrink-0 shadow-lg shadow-amber-500/10">
+                                    ${profile.profileImage 
+                                        ? `<img src="${escapeHtml(profile.profileImage)}" alt="Merchant Photo" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\\'fa-solid fa-store\\'></i>';">`
+                                        : `<i class="fa-solid fa-store"></i>`
+                                    }
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider rounded">Featured Merchant</span>
+                                        ${profile.organizationName ? `<span class="text-[11px] text-slate-400 truncate"><i class="fa-solid fa-users text-emerald-400 mr-1"></i>${escapeHtml(profile.organizationName)}</span>` : ''}
+                                    </div>
+                                    <h3 class="font-black text-xl text-white group-hover:text-amber-300 transition-colors leading-tight truncate mt-1">
+                                        ${escapeHtml(profile.shopName)}
+                                    </h3>
+                                    <p class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-1 truncate">
+                                        <i class="fa-solid fa-circle-user text-amber-400 text-xs shrink-0"></i>
+                                        <span class="truncate">Merchant: <strong class="text-slate-100">${escapeHtml(profile.characterName)}</strong></span>
+                                        ${profile.contactPhone && profile.contactPhone !== 'N/A' ? `<span class="text-slate-500">•</span><span class="font-mono text-emerald-400 font-bold"><i class="fa-solid fa-phone text-[10px] mr-1"></i>${escapeHtml(profile.contactPhone)}</span>` : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Featured Stock Showcase Header -->
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                    <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
+                                    Featured Stock &amp; Prices
+                                </span>
+                                <span class="text-[11px] text-emerald-400 font-mono font-semibold">${pricedItems.length} Priced Items Available</span>
+                            </div>
+                            
+                            <!-- Items Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+
+                        <!-- Visit Shop Button -->
+                        <div class="pt-2">
+                            <a href="${shopUrl}" class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-amber-500/10 transition-all">
+                                <span>Visit Featured Shop</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', featuredCardHtml);
+                featuredCount++;
+            });
+
+            if (featuredCount > 0) {
+                featuredSection.classList.remove('hidden');
+            }
         }
 
         // Helper function to deeply and flexibly extract values from various JSON schemas
@@ -346,7 +566,10 @@
                 }
             }
 
-            const p = rawProfile || {};
+            // Return null if no valid shop profile JSON file was found
+            if (!rawProfile) return null;
+
+            const p = rawProfile;
 
             // Extract fields with exhaustive candidate keys
             const defaultShopName = folderName.replace(/[-_]/g, ' ');
