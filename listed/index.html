@@ -367,12 +367,12 @@
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Primary Service Plan</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <label id="lbl-listing" class="calc-option border-2 border-emerald-500 bg-slate-950/80 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all">
+                            <label id="lbl-listing" class="calc-option border border-slate-800 bg-slate-950/40 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all hover:border-slate-700">
                                 <div>
                                     <div class="text-xs font-bold text-white">Standard Shop Listing</div>
                                     <div class="text-[11px] text-slate-400">$20,000</div>
                                 </div>
-                                <input type="radio" name="baseService" value="listing" checked onchange="updateCalculator()" class="text-emerald-500 focus:ring-0">
+                                <input type="checkbox" id="baseListing" value="listing" onchange="updateCalculator()" class="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-slate-900 border-slate-700">
                             </label>
 
                             <label id="lbl-setup" class="calc-option border border-slate-800 bg-slate-950/40 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all hover:border-slate-700">
@@ -380,7 +380,7 @@
                                     <div class="text-xs font-bold text-white">Turnkey Shop Setup</div>
                                     <div class="text-[11px] text-slate-400">$30,000</div>
                                 </div>
-                                <input type="radio" name="baseService" value="setup" onchange="updateCalculator()" class="text-emerald-500 focus:ring-0">
+                                <input type="checkbox" id="baseSetup" value="setup" onchange="updateCalculator()" class="w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-slate-900 border-slate-700">
                             </label>
                         </div>
                     </div>
@@ -707,8 +707,8 @@
         // Interactive Service Fee Estimator
         function updateCalculator() {
             try {
-                const baseServiceInput = document.querySelector('input[name="baseService"]:checked');
-                const baseService = baseServiceInput ? baseServiceInput.value : 'listing';
+                const baseListing = document.getElementById('baseListing');
+                const baseSetup = document.getElementById('baseSetup');
 
                 const chkFeatured = document.getElementById('chkFeatured');
                 const featuredWeeks = parseInt(document.getElementById('featuredWeeks').value) || 1;
@@ -728,25 +728,29 @@
                 document.getElementById('featuredWeeks').disabled = !chkFeatured.checked;
                 document.getElementById('updateCount').disabled = !chkUpdate.checked;
 
-                // Highlight radio labels visually
+                // Highlight selected base service labels visually
                 const lblListing = document.getElementById('lbl-listing');
                 const lblSetup = document.getElementById('lbl-setup');
 
-                if (baseService === 'listing') {
+                if (baseListing && baseListing.checked) {
                     if (lblListing) lblListing.className = 'calc-option border-2 border-emerald-500 bg-slate-950/80 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all';
-                    if (lblSetup) lblSetup.className = 'calc-option border border-slate-800 bg-slate-950/40 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all hover:border-slate-700';
                 } else {
-                    if (lblSetup) lblSetup.className = 'calc-option border-2 border-emerald-500 bg-slate-950/80 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all';
                     if (lblListing) lblListing.className = 'calc-option border border-slate-800 bg-slate-950/40 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all hover:border-slate-700';
+                }
+                if (baseSetup && baseSetup.checked) {
+                    if (lblSetup) lblSetup.className = 'calc-option border-2 border-emerald-500 bg-slate-950/80 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all';
+                } else {
+                    if (lblSetup) lblSetup.className = 'calc-option border border-slate-800 bg-slate-950/40 rounded-xl p-3 cursor-pointer flex items-center justify-between transition-all hover:border-slate-700';
                 }
 
                 let total = 0;
                 let itemsList = [];
 
-                if (baseService === 'listing') {
+                if (baseListing && baseListing.checked) {
                     total += 20000;
                     itemsList.push('• Standard Shop Directory Listing: $20,000');
-                } else if (baseService === 'setup') {
+                }
+                if (baseSetup && baseSetup.checked) {
                     total += 30000;
                     itemsList.push('• Full Turnkey Shop Setup: $30,000');
                 }
@@ -798,14 +802,14 @@ Contacting Samuel Soup to finalize listing and payment in Paralake cash.`;
         function selectPackageInCalculator(pkgType) {
             try {
                 if (pkgType === 'listing') {
-                    const radio = document.querySelector('input[name="baseService"][value="listing"]');
-                    if (radio) radio.checked = true;
+                    document.getElementById('baseListing').checked = true;
+                    document.getElementById('baseSetup').checked = false;
                     document.getElementById('chkFeatured').checked = false;
                     document.getElementById('chkUpdate').checked = false;
                     document.getElementById('chkExpedited').checked = false;
                 } else if (pkgType === 'setup') {
-                    const radio = document.querySelector('input[name="baseService"][value="setup"]');
-                    if (radio) radio.checked = true;
+                    document.getElementById('baseListing').checked = false;
+                    document.getElementById('baseSetup').checked = true;
                     document.getElementById('chkFeatured').checked = false;
                     document.getElementById('chkUpdate').checked = false;
                     document.getElementById('chkExpedited').checked = false;
